@@ -18,6 +18,8 @@
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^9.0.1",
+    "@mdi/js": "^7.2.96",
+    "@pixiv/three-vrm": "^2.0.0",
     "@react-three/drei": "^9.77.3",
     "@react-three/fiber": "^8.13.3",
     "glsl-random": "^0.0.5",

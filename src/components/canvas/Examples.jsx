@@ -55,14 +55,14 @@ export const Logo = ({ route = '/blob', ...props }) => {
 }
 
 export function Duck(props) {
-  const { scene } = useGLTF('/duck.glb')
+  const { scene } = useGLTF('/3D/duck.glb')
 
   useFrame((state, delta) => (scene.rotation.y += delta))
 
   return <primitive object={scene} {...props} />
 }
 export function Dog(props) {
-  const { scene } = useGLTF('/dog.glb')
+  const { scene } = useGLTF('/3D/dog.glb')
 
   return <primitive object={scene} {...props} />
 }
