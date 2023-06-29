@@ -23,6 +23,7 @@
     "@rainbow-me/rainbowkit": "^1.0.3",
     "@react-three/drei": "^9.77.3",
     "@react-three/fiber": "^8.13.3",
+    "axios": "^1.4.0",
     "encoding": "^0.1.13",
     "framer-motion": "^10.12.17",
     "glsl-random": "^0.0.5",

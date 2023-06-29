@@ -20,7 +20,7 @@ export default function Head() {
       <meta name='description' content={description} />
       <meta
         name='keywords'
-        content='AI,Competition,Fun"
+        content='AI,Competition,Fun'
       />
       <meta name='robots' content='index,follow' />
       <meta name='distribution' content='web' />
@@ -40,7 +40,8 @@ export default function Head() {
       <link rel='apple-touch-icon' sizes='180x180' href='/icons/apple-touch-icon.png' />
       <link rel='manifest' href='/manifest.json' />
       <link rel='mask-icon' color='#000000' href='/icons/safari-pinned-tab.svg' />
-      <link rel='apple-touch-startup-image' href='/startup.png' />
+      <link rel='apple-touch-startup-image' href='/icons/share.png' />
+      <link rel="icon" type="image/x-icon" href="favicon.ico" />
 
       {/* Meta Tags for HTML pages on Mobile */}
       {/* <meta name="format-detection" content="telephone=yes"/>
@@ -55,6 +56,7 @@ export default function Head() {
         Be sure validate your Twitter card markup on the documentation site. */}
       <meta name='twitter:card' content='summary' />
       <meta name='twitter:site' content={twitter} />
+
     </>
   )
 }

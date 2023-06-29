@@ -252,8 +252,8 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    width: 40,
-    height: 40,
+    width: 30,
+    height: 30,
     margin: "0.8rem",
   },
   circle: {

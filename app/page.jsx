@@ -6,12 +6,13 @@ import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useAccount } from 'wagmi'
+import axios from 'axios'
+import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 
-
-const Logo = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Logo), { ssr: false })
-const Dog = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Dog), { ssr: false })
-const Duck = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Duck), { ssr: false })
-const Avatar = dynamic(() => import('@/components/canvas/Avatar'), { ssr: false})
+// const Logo = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Logo), { ssr: false })
+// const Dog = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Dog), { ssr: false })
+// const Duck = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Duck), { ssr: false })
+const Avatar = dynamic(() => import('@/components/canvas/Avatar'), { ssr: false })
 
 const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.View), {
   ssr: false,
@@ -32,14 +33,15 @@ const Common = dynamic(() => import('@/components/canvas/View').then((mod) => mo
 
 export default function Page() {
   const [state, setState] = useState("start")
-  const [recording, setRecording] = useState(false);
+  const [recording, setRecording] = useState(false)
   const [stream, setStream] = useState(null)
   const [audioChunks, setAudioChunks] = useState([])
+  const [audioBlob, setAudioBlob] = useState(null);
   const [audio, setAudio] = useState(null);
   const playback = useRef(null);
   const { openConnectModal } = useConnectModal()
   const { address, isConnected } = useAccount()
-  const mediaRecorder = useRef(null);
+  const mediaRecorder = useRef(null)
 
 
   const startRecord = () => {
@@ -52,7 +54,7 @@ export default function Page() {
         }).then(streamData => {
           setStream(streamData)
           setState("inprogress")
-          const media = new MediaRecorder(streamData, { type: "audio/wave" })
+          const media = new MediaRecorder(streamData, { mimeType: "audio/webm" })
           setRecording(true)
           mediaRecorder.current = media
           mediaRecorder.current.start()
@@ -82,11 +84,13 @@ export default function Page() {
     mediaRecorder.current.stop()
     mediaRecorder.current.onstop = () => {
       //creates a blob file from the audiochunks data
-       const audioBlob = new Blob(audioChunks, { type: "audio/wav" })
+      const tempAudioBlob = new Blob(audioChunks, { type: "audio/webm", mimeType: "audio/webm"})
       //creates a playable URL from the blob file.
-       const audioUrl = URL.createObjectURL(audioBlob)
-       setAudio(audioUrl)
-       setAudioChunks([])
+      const audioUrl = URL.createObjectURL(tempAudioBlob)
+
+      setAudio(audioUrl)
+      setAudioBlob(tempAudioBlob)
+      setAudioChunks([])
     };
 
   }
@@ -107,6 +111,50 @@ export default function Page() {
     playback.current.pause()
   }
 
+  const submitRecording = async () => {
+    if (audio) {
+      // download audio file
+      const link = document.createElement('a');
+      link.href = audio
+      link.download = 'audio.webm';  // the file name you want to save as
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // convert blob to wav
+      try {
+        // submit form
+        let formData = new FormData()
+        console.log(audioBlob)
+        console.log(typeof audioBlob)
+        formData.append('audio', audioBlob, 'audio.webm')
+
+        res = await axios.post(process.env.NEXT_PUBLIC_BACKEND + `/prove`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+
+        // reset
+        playback.current = null
+        setAudio(null)
+        setState("start")
+      }
+      catch(err) {
+        alert(err);
+        return;
+      }
+    } else {
+      alert("No Audio To Send!")
+      return;
+    }
+  }
+
+  const restart = () => {
+    playback.current = null
+    setAudio(null)
+    setState("start")
+  }
 
   return (
     <>
@@ -130,13 +178,13 @@ export default function Page() {
           {
             state === "inprogress" && recording &&
             <>
-            <h1 className='my-2 text-xl md:text-2xl lg:text-3xl leading-tight text-center'>Please Sing! Press Stop when you're done ❤️</h1>
+            <h1 className='my-2 text-xl md:text-2xl lg:text-3xl leading-tight text-center'>Sing now! Press Stop when you're done️</h1>
             </>
           }
           {
             state === "end" &&
             <>
-            <h1 className='my-2 text-xl md:text-2xl lg:text-3xl leading-tight text-center'>Submit to see how well you've done 🤔️</h1>
+            <h1 className='my-2 text-xl md:text-2xl lg:text-3xl leading-tight text-center'>Will the AI like you? Get judged 🤔️</h1>
             </>
           }
           {
@@ -145,7 +193,7 @@ export default function Page() {
             <h1 className='my-2 text-xl md:text-2xl lg:text-3xl leading-tight text-center'>Here's what you've sung ❤️</h1>
             </>
           }
-          <div className='my-4 flex justify-center items-center text-center'>
+          <div className='my-2 ml-8 mr-8 flex justify-center items-center text-center'>
             <RecordButton
               recordState={state}
               onClick={(e) => {
@@ -166,6 +214,26 @@ export default function Page() {
                 }
               }}
             />
+            { state === "end" &&
+              <>
+                <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    submitRecording()
+                  }}
+                >
+                  SUBMIT
+                </button>
+                <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    restart()
+                  }}
+                >
+                  RESTART
+                </button>
+              </>
+            }
           </div>
         </div>
       </div>
