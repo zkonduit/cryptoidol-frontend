@@ -10,7 +10,7 @@ export default function NavBar() {
     <nav className='gradient-background flex flex-wrap items-center jutify-between w-full py-1 px-2 text-lg navbar'>
       <div className='container-fluid w-full flex flex-wrap items-center justify-between px-1'>
         <div>
-          <a href='#'>
+          <a href='/'>
             <img
               style={{
                 paddingTop: '1rem',

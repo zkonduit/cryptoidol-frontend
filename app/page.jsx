@@ -188,10 +188,10 @@ export default function Page() {
   const publishOnchain = () => {
     if(!isConnected) {
       openConnectModal()
-    } else {
-      setState("start")
-      return
     }
+
+    setState("start")
+    return
   }
 
   return (
