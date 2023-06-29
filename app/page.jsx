@@ -7,7 +7,6 @@ import { Suspense } from 'react'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useAccount } from 'wagmi'
 import axios from 'axios'
-import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 
 // const Logo = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Logo), { ssr: false })
 // const Dog = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Dog), { ssr: false })
@@ -36,9 +35,13 @@ export default function Page() {
   const [recording, setRecording] = useState(false)
   const [stream, setStream] = useState(null)
   const [audioChunks, setAudioChunks] = useState([])
-  const [audioBlob, setAudioBlob] = useState(null);
-  const [audio, setAudio] = useState(null);
-  const playback = useRef(null);
+  const [audioBlob, setAudioBlob] = useState(null)
+  const [audio, setAudio] = useState(null)
+  const [score, setScore] = useState(0)
+  const [rating, setRating] = useState(null)
+  const [resultMsg, setResultMsg] = useState(null)
+
+  const playback = useRef(null)
   const { openConnectModal } = useConnectModal()
   const { address, isConnected } = useAccount()
   const mediaRecorder = useRef(null)
@@ -95,6 +98,33 @@ export default function Page() {
 
   }
 
+  const setResultDisplay = (score) => {
+    if (score >= 0 && score < 10) {
+      setRating("D")
+      setResultMsg("Yoko OnO :(")
+    }
+    else if (score >= 10 && score < 20) {
+      setRating("C")
+      setResultMsg("Best voice in the world, just not the world I'm living in right now.")
+    }
+    else if (score >= 20 && score < 30) {
+      setRating("B")
+      setResultMsg("What an average sounding voice :)")
+    }
+    else if (score >= 30 && score < 40) {
+      setRating("A")
+      setResultMsg("Not bad!")
+    }
+    else if (score >= 40 && score < 50) {
+      setRating("S")
+      setResultMsg("You did an amazing job!")
+    }
+    else {
+      setRating("SS")
+      setResultMsg("Oh my, what a sexy voice !")
+    }
+  }
+
   const startPlayback = () => {
     playback.current = new Audio(audio)
     // playback.current.repeat = false;
@@ -114,34 +144,37 @@ export default function Page() {
   const submitRecording = async () => {
     if (audio) {
       // download audio file
-      const link = document.createElement('a');
-      link.href = audio
-      link.download = 'audio.webm';  // the file name you want to save as
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // const link = document.createElement('a');
+      // link.href = audio
+      // link.download = 'audio.webm';  // the file name you want to save as
+      // document.body.appendChild(link);
+      // link.click();
+      // document.body.removeChild(link);
 
       // convert blob to wav
       try {
         // submit form
         let formData = new FormData()
-        console.log(audioBlob)
-        console.log(typeof audioBlob)
         formData.append('audio', audioBlob, 'audio.webm')
 
-        res = await axios.post(process.env.NEXT_PUBLIC_BACKEND + `/prove`, formData, {
+        setState("processing")
+        let res = await axios.post(process.env.NEXT_PUBLIC_BACKEND + `/prove`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         })
 
+        setScore(res.data.res.output_data)
+        setResultDisplay(score)
+
         // reset
         playback.current = null
         setAudio(null)
-        setState("start")
+        setState("result")
       }
       catch(err) {
         alert(err);
+        setState("end")
         return;
       }
     } else {
@@ -170,7 +203,7 @@ export default function Page() {
       </div>
 
       <div className='flex justify-center items-center'>
-        <div className='flex w-full flex-col items-start justify-center items-center p-4 text-center'>
+        <div className='flex w-full flex-col justify-center items-center p-4 text-center'>
           {
             state === "start" &&
             <h1 className='my-2 text-xl md:text-2xl lg:text-3xl leading-tight text-center'>Think you can be the next <strong> Crypto Idol</strong> ?</h1>
@@ -178,11 +211,11 @@ export default function Page() {
           {
             state === "inprogress" && recording &&
             <>
-            <h1 className='my-2 text-xl md:text-2xl lg:text-3xl leading-tight text-center'>Sing now! Press Stop when you're done️</h1>
+            <h1 className='my-2 text-xl md:text-2xl lg:text-3xl leading-tight text-center'>Sing now! Press Stop when you&#39;re done️</h1>
             </>
           }
           {
-            state === "end" &&
+            state === "end" && !recording &&
             <>
             <h1 className='my-2 text-xl md:text-2xl lg:text-3xl leading-tight text-center'>Will the AI like you? Get judged 🤔️</h1>
             </>
@@ -190,30 +223,56 @@ export default function Page() {
           {
             state === "inprogress" && !recording &&
             <>
-            <h1 className='my-2 text-xl md:text-2xl lg:text-3xl leading-tight text-center'>Here's what you've sung ❤️</h1>
+            <h1 className='my-2 text-xl md:text-2xl lg:text-3xl leading-tight text-center'>Here&#39;s what you&#39;ve sung ❤️</h1>
             </>
           }
+          {
+            state === "processing" && !recording &&
+            <>
+            <h1 className='my-2 text-xl md:text-2xl lg:text-3xl leading-tight text-center'>️Computing results and zkml proof 🤖...</h1>
+            </>
+          }
+
+          {
+            state === "result" && !recording && score >= 0 && score < 20 &&
+            <>
+              <h1 className='my-2 text-xl md:text-2xl lg:text-3xl leading-tight text-center'>️
+                <strong>Score: {rating}.</strong> {resultMsg}
+              </h1>
+                <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    submitRecording()
+                  }}
+                >
+                  PUBLISH ONCHAIN
+                </button>
+            </>
+          }
+
           <div className='my-2 ml-8 mr-8 flex justify-center items-center text-center'>
-            <RecordButton
-              recordState={state}
-              onClick={(e) => {
-                e.preventDefault()
-                if (state === "start") {
-                  startRecord()
-                }
-                else if (state === "inprogress") {
-                  setState("end")
-                  if (recording) {
-                    stopRecord()
-                  } else {
-                    stopPlayback()
+            { state !== "processing" && state !== "result" &&
+              <RecordButton
+                recordState={state}
+                onClick={(e) => {
+                  e.preventDefault()
+                  if (state === "start") {
+                    startRecord()
                   }
-                }
-                else if (state === "end") {
-                  startPlayback()
-                }
-              }}
-            />
+                  else if (state === "inprogress") {
+                    setState("end")
+                    if (recording) {
+                      stopRecord()
+                    } else {
+                      stopPlayback()
+                    }
+                  }
+                  else if (state === "end") {
+                    startPlayback()
+                  }
+                }}
+              />
+            }
             { state === "end" &&
               <>
                 <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
