@@ -140,12 +140,12 @@ export default function Page() {
   const submitRecording = async () => {
     if (audio) {
       // download audio file
-      // const link = document.createElement('a');
-      // link.href = audio
-      // link.download = 'audio.webm';  // the file name you want to save as
-      // document.body.appendChild(link);
-      // link.click();
-      // document.body.removeChild(link);
+      const link = document.createElement('a');
+      link.href = audio
+      link.download = 'audio.webm';  // the file name you want to save as
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
       // convert blob to wav
       try {
