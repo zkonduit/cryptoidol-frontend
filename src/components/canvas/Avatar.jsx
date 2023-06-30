@@ -7,8 +7,6 @@ import * as THREE from "three";
 import { mixamoVRMRigMap } from './MixamoVRRigMap';
 import { loadMixamoAnimation } from './LoadMixamoAnimation';
 
-// import { Object3D } from 'three'
-// import { useControls } from 'leva'
 
 const loader = new GLTFLoader();
 loader.register((parser) => {
@@ -16,30 +14,46 @@ loader.register((parser) => {
 });
 
 
-export default function Avatar ({ url = "/3D/animations/Chicken Dance.fbx", ...props}) {
-  // const { leftShoulder, rightShoulder } = useControls({
-  //   leftShoulder: { value: 0, min: -1, max: 1 },
-  //   rightShoulder: { value: 0, min: -1, max: 1 }
-  // })
-  // const gltf = useGLTF('/3D/Ailis.vrm', loader)
+const PREFIX = '/3D/animations/'
+
+export default function Avatar ({
+  avatarState = 'start',
+  ...props
+}) {
   const [vrm, setVrm] = useState(null)
   const [gltf, setGltf] = useState(null)
-  const [blink, setBlink] = useState(false)
-  const [animationUrl, setAnimationUrl] = useState("")
+  const [animationUrl, setAnimationUrl] = useState('')
   const [mixer, setMixer] = useState(null)
-  // const {} = useThree()
-  // const [bonesStore, setBones] = useState({})
+  const [lookAtTarget, setLookAtTarget] = useState(null);
 
-  useEffect(() => {
-    setAnimationUrl(url)
-    if (vrm) {
-      loadMixamoAnimation(url, vrm).then(clip => {
-        mixer.clipAction(clip).play();
-        // mixer.timeScale = params.timeScale;
-      })
-    }
-  }, [url, vrm])
+  // animation states
+  const [blink, setBlink] = useState(false)
+  const [happy, setHappy] = useState(false)
 
+  // useEffect(() => {
+  // const setFromEvent = (e) => {
+  //   console.log(e.clientX, e.clientY);
+  //   lookAtTarget.position.x = 0.9 * (e.clientX - 0.5 * window.innerWidth) / window.innerHeight;
+  //   lookAtTarget.position.y = - 10.0 * (e.clientY - 0.5 * window.innerHeight) / window.innerHeight;
+  //   // setLookAtTarget(newLookAtTarget);
+  // }
+
+  // console.log(lookAtTarget);
+
+  // window.addEventListener("mousemove", setFromEvent);
+  // useEffect(() => {
+  //   if (lookAtTarget) {
+  //     const updateMousePosition = e => {
+  //       // setMousePosition({ x: ev.clientX, y: ev.clientY });
+  //       lookAtTarget.position.x = 0.9 * (e.clientX - 0.5 * window.innerWidth) / window.innerHeight;
+  //       lookAtTarget.position.y = - 10.0 * (e.clientY - 0.5 * window.innerHeight) / window.innerHeight;
+  //     };
+  //     window.addEventListener('mousemove', updateMousePosition);
+  //     return () => {
+  //       window.removeEventListener('mousemove', updateMousePosition);
+  //     };
+  //   }
+  // }, []);
 
   useEffect(() => {
     // load 3d model
@@ -51,6 +65,7 @@ export default function Avatar ({ url = "/3D/animations/Chicken Dance.fbx", ...p
 
         setGltf(gltf)
         const vrm = gltf.userData.vrm
+        gltf.cameras
 
         // create animation mixer
         let mixer = new THREE.AnimationMixer(gltf.scene)
@@ -65,8 +80,9 @@ export default function Avatar ({ url = "/3D/animations/Chicken Dance.fbx", ...p
           obj.frustumCulled = false
         })
 
-        // scene.add( vrm.scene );
-        // currentVrm = vrm;
+        console.log(vrm)
+        // setLookAtTarget(new THREE.Object3D);
+        // vrm.lookAt.target = lookAtTarget
         setVrm(vrm)
       },
 
@@ -75,6 +91,21 @@ export default function Avatar ({ url = "/3D/animations/Chicken Dance.fbx", ...p
       ( error ) => console.error( error )
     )
   }, []);
+
+
+  // animation handler
+  useEffect(() => {
+    if (vrm && mixer && animationUrl) {
+      mixer.stopAllAction()
+      loadMixamoAnimation(animationUrl, vrm)
+      .then(clip => {
+        mixer.clipAction(clip).play();
+        mixer.timeScale = 1.0;
+      }).catch(err => {
+        console.log(err)
+      })
+    }
+  }, [vrm, mixer, animationUrl])
 
   // track mouse move
   // useEffect(() => {
@@ -92,15 +123,42 @@ export default function Avatar ({ url = "/3D/animations/Chicken Dance.fbx", ...p
   //   };
   // }, []);
 
-  // handle periodic blinking
+  // handle periodic events
   useFrame(({ clock }, delta) => {
-    // blink is 6
-    if ( vrm ) {
+    if (vrm && mixer) {
+
       // blink every ~5 seconds
-      if (Math.round(clock.elapsedTime % 4) == 0) {
+      if (Math.round(clock.elapsedTime % 5) == 0) {
         setBlink(true)
       }
 
+      if (Math.round(clock.elapsedTime % 13) == 0) {
+        setHappy(true)
+      }
+
+      // animation sequence start
+      if (avatarState == 'start') {
+        setAnimationUrl(PREFIX + 'Button Pushing.fbx')
+      }
+
+      if (avatarState == 'inprogress') {
+        setAnimationUrl(PREFIX + 'Chicken Dance.fbx')
+      }
+
+      if (avatarState == 'end') {
+        setAnimationUrl(PREFIX + 'Thinking.fbx')
+      }
+
+      if (avatarState == 'processing') {
+        setAnimationUrl(PREFIX + 'Gangnam Style.fbx')
+      }
+
+      if (avatarState == 'result') {
+        setAnimationUrl(PREFIX + 'Thankful.fbx')
+      }
+
+
+      // handle blink
       if (blink) {
         // tweak expressions
         const s = Math.sin(2 * Math.PI * clock.elapsedTime )
@@ -113,17 +171,21 @@ export default function Avatar ({ url = "/3D/animations/Chicken Dance.fbx", ...p
         }
       }
 
-      vrm.update(delta);
-    }
-  })
+      // handle happy
+      if (happy && !blink) {
+        // tweak expressions
+        const s = Math.sin(Math.PI * clock.elapsedTime )
+        vrm.expressionManager.setValue('relaxed', 0.5 + 0.5 * s );
 
-  // handle animations
-  useFrame(({ clock }, delta) => {
-    // blink is 6
-    if (vrm) {
-      if (mixer) {
-        mixer.update(delta);
+        // don't blink when happy is done
+        if (0.5 + 0.5 * s <= 0.01) {
+          setHappy(false)
+        }
       }
+
+      // update deltas
+      mixer.update(delta)
+      vrm.update(delta)
     }
   })
 

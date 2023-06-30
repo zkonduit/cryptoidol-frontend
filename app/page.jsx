@@ -200,7 +200,8 @@ export default function Page() {
         <div className='w-full text-center mx-auto flex flex-col flex-wrap items-center md:flex-row'>
           <View orbit className='flex h-[25rem] sm:h-[32rem] md:h-[36rem] w-full flex-col items-center justify-center'>
             <Suspense fallback={null}>
-              <Avatar scale={3.5} position={[0, -4.1, 0]} rotation={[0.3, -Math.PI, 0]} />
+              {/* <Avatar scale={1} position={[0, -4.1, 0]} rotation={[0.3, -Math.PI, 0]} /> */}
+              <Avatar position={[0, -1.3, 4.5]} rotation={[0, -Math.PI, 0]} avatarState={state} />
               <Common />
             </Suspense>
           </View>
@@ -256,7 +257,11 @@ export default function Page() {
                 Share On Socials
               </h3>
               <div>
-                <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://cryptoidol.tech" aria-label="Share on LinkedIn">
+                <a
+                  href="https://www.linkedin.com/sharing/share-offsite/?url=https://cryptoidol.tech"
+                  aria-label="Share on LinkedIn"
+                  target="_blank" rel="noopener noreferrer"
+                >
                   <button
                     type="button"
                     data-te-ripple-init
@@ -273,7 +278,11 @@ export default function Page() {
                     </svg>
                   </button>
                 </a>
-                <a href="https://twitter.com/intent/tweet?text=I%20have%20participated%20in%20CryptoIdol.%20Have%20you?%20https://cryptoidol.tech" aria-label="Share On Twitter">
+                <a
+                  href="https://twitter.com/intent/tweet?text=I%20have%20participated%20in%20CryptoIdol.%20Have%20you?%20https://cryptoidol.tech"
+                  aria-label="Share On Twitter"
+                  target="_blank" rel="noopener noreferrer"
+                >
                   <button
                     type="button"
                     data-te-ripple-init
@@ -282,7 +291,7 @@ export default function Page() {
                     style={{backgroundColor: "#1da1f2"}}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      class="h-4 w-4"
+                      className="h-4 w-4"
                       fill="currentColor"
                       viewBox="0 0 24 24">
                       <path
