@@ -38,6 +38,7 @@ export default function Page() {
   const [audioBlob, setAudioBlob] = useState(null)
   const [audio, setAudio] = useState(null)
   const [score, setScore] = useState(0)
+  const [proof, setProof] = useState("")
   const [rating, setRating] = useState(null)
   const [resultMsg, setResultMsg] = useState(null)
   const [mimeType, setMimeType] = useState('audio/webm')
@@ -106,23 +107,23 @@ export default function Page() {
   }
 
   const setResultDisplay = (score) => {
-    if (score >= 0 && score < 10) {
+    if (score >= 0 && score < 200) {
       setRating("D")
       setResultMsg("Yoko OnO :(")
     }
-    else if (score >= 10 && score < 20) {
+    else if (score >= 200 && score < 400) {
       setRating("C")
       setResultMsg("Best voice in the world, just not the world I'm living in right now.")
     }
-    else if (score >= 20 && score < 30) {
+    else if (score >= 400 && score < 600) {
       setRating("B")
       setResultMsg("What an average sounding voice :)")
     }
-    else if (score >= 30 && score < 40) {
+    else if (score >= 600 && score < 800) {
       setRating("A")
       setResultMsg("Not bad!")
     }
-    else if (score >= 40 && score < 50) {
+    else if (score >= 800 && score < 100) {
       setRating("S")
       setResultMsg("You did an amazing job!")
     }
@@ -155,13 +156,13 @@ export default function Page() {
         return
       }
       // download audio file
-      const link = document.createElement('a');
-      link.href = audio
+      // const link = document.createElement('a');
+      // link.href = audio
 
-      link.download = 'audio.webm';  // the file name you want to save as
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // link.download = 'audio.webm';  // the file name you want to save as
+      // document.body.appendChild(link);
+      // link.click();
+      // document.body.removeChild(link);
 
       // convert blob to wav
       try {
@@ -188,6 +189,7 @@ export default function Page() {
         console.log(res);
 
         setScore(res.data.res.output_data)
+        setProof(res.data.res.proof)
         setResultDisplay(score)
 
         // reset
@@ -269,19 +271,19 @@ export default function Page() {
           }
 
           {
-            state === "result" && !recording && score >= 0 && score < 20 &&
+            state === "result" && !recording &&
             <>
               <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
                 <strong>Score: {rating}.</strong> {resultMsg}
               </h1>
-              <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
+              {/* <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
                 onClick={(e) => {
                   e.preventDefault()
                   publishOnchain()
                 }}
               >
                 PUBLISH ONCHAIN
-              </button>
+              </button> */}
               <h3 className="mb-1">
                 Share On Socials
               </h3>
