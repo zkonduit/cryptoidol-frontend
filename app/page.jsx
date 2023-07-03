@@ -107,6 +107,7 @@ export default function Page() {
   }
 
   const setResultDisplay = (score) => {
+    console.log("Score: ", score)
     if (score >= 0 && score < 200) {
       setRating("D")
       setResultMsg("Yoko OnO :(")
@@ -123,7 +124,7 @@ export default function Page() {
       setRating("A")
       setResultMsg("Not bad!")
     }
-    else if (score >= 800 && score < 100) {
+    else if (score >= 800 && score < 1000) {
       setRating("S")
       setResultMsg("You did an amazing job!")
     }
@@ -186,11 +187,12 @@ export default function Page() {
           }
         })
 
-        console.log(res);
-
+        // console.log(res);
+        // console.log(res.data.res.output_data);
+        // console.log(res.data.res.proof);
         setScore(res.data.res.output_data)
         setProof(res.data.res.proof)
-        setResultDisplay(score)
+        setResultDisplay(res.data.res.output_data)
 
         // reset
         playback.current = null
