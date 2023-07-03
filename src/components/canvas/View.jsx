@@ -27,7 +27,11 @@ const View = forwardRef(({ children, orbit, presentation, ...props }, ref) => {
           {children}
           {orbit && <OrbitControls />}
           {presentation &&
-            <PresentationControls snap global zoom={0.8} rotation={[0, -Math.PI / 4, 0]} polar={[0, Math.PI / 4]} azimuth={[-Math.PI / 4, Math.PI / 4]} />
+            <PresentationControls enabled global snap
+              // rotation={[0, -Math.PI / 2, 0]}
+              // polar={[0, Math.PI / 2]}
+              // azimuth={[-Math.PI / 2, Math.PI / 2]}
+            />
           }
         </ViewImpl>
       </Three>

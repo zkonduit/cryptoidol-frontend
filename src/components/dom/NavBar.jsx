@@ -7,17 +7,17 @@ export default function NavBar() {
   const [expand, setExpand] = useState(false)
 
   return (
-    <nav className='gradient-background flex flex-wrap items-center jutify-between w-full py-1 px-2 text-lg navbar'>
+    <nav className='gradient-background flex flex-wrap items-center jutify-between w-full py-1 px-1 text-lg navbar'>
       <div className='container-fluid w-full flex flex-wrap items-center justify-between px-1'>
         <div>
           <a href='/'>
             <img
               style={{
                 paddingTop: '1rem',
-                paddingLeft: '0.2rem',
+                paddingLeft: '0.5rem',
                 paddingRight: '0.5rem',
                 paddingBottom: '1rem',
-                width: '7.5rem',
+                width: '6.5rem',
                 color: '#FC5130',
               }}
               src='/img/logo_text.png'

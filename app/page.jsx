@@ -225,7 +225,10 @@ export default function Page() {
     <>
       <div className='flex justify-center items-center max-h-screen'>
         <div className='w-full text-center mx-auto flex flex-col flex-wrap items-center md:flex-row'>
-          <View orbit className='flex h-[25rem] sm:h-[32rem] md:h-[36rem] w-full flex-col items-center justify-center'>
+          <View
+            presentation
+            className='flex h-[25rem] sm:h-[32rem] md:h-[36rem] w-full flex-col items-center justify-center'
+          >
             <Suspense fallback={null}>
               <Avatar position={[0, -1.3, 4.5]} rotation={[0, -Math.PI, 0]} avatarState={state} />
               <Common />
