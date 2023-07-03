@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { RecordButton } from '@/components/dom/RecordButton'
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
@@ -40,21 +40,32 @@ export default function Page() {
   const [score, setScore] = useState(0)
   const [rating, setRating] = useState(null)
   const [resultMsg, setResultMsg] = useState(null)
+  const [mimeType, setMimeType] = useState('audio/webm')
 
   const playback = useRef(null)
   const { openConnectModal } = useConnectModal()
   const { address, isConnected } = useAccount()
   const mediaRecorder = useRef(null)
 
+  useEffect(() => {
+    if (MediaRecorder.isTypeSupported('audio/webm')) {
+      setMimeType('audio/webm')
+    }
+    if (MediaRecorder.isTypeSupported('audio/mp4')) {
+      setMimeType('audio/mp4')
+    }
+  }, [mimeType])
 
-  const startRecord = () => {
+
+  const startRecord = async () => {
     if ("MediaRecorder" in window) {
       navigator.mediaDevices.getUserMedia({
           audio: true,
       }).then(streamData => {
         setStream(streamData)
         setState("inprogress")
-        const media = new MediaRecorder(streamData, { mimeType: "audio/webm" })
+
+        const media = new MediaRecorder(streamData, { mimeType: mimeType })
         setRecording(true)
         mediaRecorder.current = media
         mediaRecorder.current.start()
@@ -83,7 +94,7 @@ export default function Page() {
     mediaRecorder.current.stop()
     mediaRecorder.current.onstop = () => {
       //creates a blob file from the audiochunks data
-      const tempAudioBlob = new Blob(audioChunks, { type: "audio/webm", mimeType: "audio/webm"})
+      const tempAudioBlob = new Blob(audioChunks, { type: mimeType, mimeType: mimeType})
       //creates a playable URL from the blob file.
       const audioUrl = URL.createObjectURL(tempAudioBlob)
 
@@ -139,9 +150,14 @@ export default function Page() {
 
   const submitRecording = async () => {
     if (audio) {
+      if(!isConnected) {
+        await openConnectModal()
+        return
+      }
       // download audio file
       const link = document.createElement('a');
       link.href = audio
+
       link.download = 'audio.webm';  // the file name you want to save as
       document.body.appendChild(link);
       link.click();
@@ -151,7 +167,16 @@ export default function Page() {
       try {
         // submit form
         let formData = new FormData()
-        formData.append('audio', audioBlob, 'audio.webm')
+        if (mimeType === "audio/webm") {
+          formData.append('audio', audioBlob, 'audio.webm')
+        }
+
+        if (mimeType === "audio/mp4") {
+          formData.append('audio', audioBlob, 'audio.mp3')
+        }
+
+        console.log(address)
+        formData.append('address', address)
 
         setState("processing")
         let res = await axios.post(process.env.NEXT_PUBLIC_BACKEND + `/prove`, formData, {
@@ -159,6 +184,8 @@ export default function Page() {
             'Content-Type': 'multipart/form-data'
           }
         })
+
+        console.log(res);
 
         setScore(res.data.res.output_data)
         setResultDisplay(score)
@@ -200,7 +227,6 @@ export default function Page() {
         <div className='w-full text-center mx-auto flex flex-col flex-wrap items-center md:flex-row'>
           <View orbit className='flex h-[25rem] sm:h-[32rem] md:h-[36rem] w-full flex-col items-center justify-center'>
             <Suspense fallback={null}>
-              {/* <Avatar scale={1} position={[0, -4.1, 0]} rotation={[0.3, -Math.PI, 0]} /> */}
               <Avatar position={[0, -1.3, 4.5]} rotation={[0, -Math.PI, 0]} avatarState={state} />
               <Common />
             </Suspense>
