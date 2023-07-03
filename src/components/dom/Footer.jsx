@@ -6,12 +6,12 @@ export default function Footer() {
         <li>
           <a href="/" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Compete</a>
         </li>
-        <li>
+        {/* <li>
           <a href="/leaderboard" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Leaderboard</a>
         </li>
         <li>
           <a href="/bounty" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Bounty</a>
-        </li>
+        </li> */}
         <li>
           <a href="https://github.com/zkonduit/ezkl" target="_blank" rel="noopener noreferrer" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Github</a>
         </li>
