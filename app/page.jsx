@@ -63,7 +63,7 @@ export default function Page() {
     address: addresses.matic,
     abi: cryptoIdolABI,
     functionName: 'submitScore',
-    args: [[score, parseInt(address)], proof],
+    args: [score, '0x' + proof],
     enabled: Boolean(proof),
   })
 
@@ -302,7 +302,7 @@ export default function Page() {
               </h1>
               { !isSuccess &&
                 <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
-                  disabled={!write || isLoading}
+                  disabled={isLoading}
                   onClick={(e) => {
                     e.preventDefault()
                     publishOnchain()
