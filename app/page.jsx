@@ -5,8 +5,17 @@ import { RecordButton } from '@/components/dom/RecordButton'
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
-import { useAccount } from 'wagmi'
+import {
+  useAccount,
+  useNetwork,
+  usePrepareContractWrite,
+  useContractWrite,
+  useWaitForTransaction
+} from 'wagmi'
 import axios from 'axios'
+import addresses from '../data/addresses.json'
+import cryptoIdolABI from '../data/CryptoIdol.json'
+
 
 // const Logo = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Logo), { ssr: false })
 // const Dog = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Dog), { ssr: false })
@@ -38,6 +47,7 @@ export default function Page() {
   const [audioBlob, setAudioBlob] = useState(null)
   const [audio, setAudio] = useState(null)
   const [score, setScore] = useState(0)
+  const [pubInputs, setPubInputs] = useState([])
   const [proof, setProof] = useState("")
   const [rating, setRating] = useState(null)
   const [resultMsg, setResultMsg] = useState(null)
@@ -46,7 +56,22 @@ export default function Page() {
   const playback = useRef(null)
   const { openConnectModal } = useConnectModal()
   const { address, isConnected } = useAccount()
+  const { chain } = useNetwork()
   const mediaRecorder = useRef(null)
+
+  const { config } = usePrepareContractWrite({
+    address: addresses.matic,
+    abi: cryptoIdolABI,
+    functionName: 'submitScore',
+    args: [[score, parseInt(address)], proof],
+    enabled: Boolean(proof),
+  })
+
+  const { write, data } = useContractWrite(config)
+
+  const { isLoading, isSuccess } = useWaitForTransaction({
+    hash: data?.hash,
+  })
 
   useEffect(() => {
     if (MediaRecorder.isTypeSupported('audio/webm')) {
@@ -107,7 +132,6 @@ export default function Page() {
   }
 
   const setResultDisplay = (score) => {
-    console.log("Score: ", score)
     if (score >= 0 && score < 200) {
       setRating("D")
       setResultMsg("Yoko OnO :(")
@@ -177,7 +201,6 @@ export default function Page() {
           formData.append('audio', audioBlob, 'audio.mp3')
         }
 
-        console.log(address)
         formData.append('address', address)
 
         setState("processing")
@@ -187,9 +210,6 @@ export default function Page() {
           }
         })
 
-        // console.log(res);
-        // console.log(res.data.res.output_data);
-        // console.log(res.data.res.proof);
         setScore(res.data.res.output_data)
         setProof(res.data.res.proof)
         setResultDisplay(res.data.res.output_data)
@@ -221,8 +241,10 @@ export default function Page() {
       openConnectModal()
     }
 
-    setState("start")
-    return
+    console.log(score)
+    console.log(proof)
+
+    write?.()
   }
 
   return (
@@ -278,14 +300,27 @@ export default function Page() {
               <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
                 <strong>Score: {rating}.</strong> {resultMsg}
               </h1>
-              {/* <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
-                onClick={(e) => {
-                  e.preventDefault()
-                  publishOnchain()
-                }}
-              >
-                PUBLISH ONCHAIN
-              </button> */}
+              { !isSuccess &&
+                <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
+                  disabled={!write || isLoading}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    publishOnchain()
+                  }}
+                >
+                  {isLoading ? "SUBITTING..." : "SUBMIT ONCHAIN" }
+                </button>
+              }
+              { isSuccess &&
+                <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    restart()
+                  }}
+                >
+                  RESTART
+                </button>
+              }
               <h3 className="mb-1">
                 Share On Socials
               </h3>
