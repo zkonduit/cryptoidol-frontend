@@ -181,13 +181,13 @@ export default function Page() {
         return
       }
       // download audio file
-      // const link = document.createElement('a');
-      // link.href = audio
+      const link = document.createElement('a');
+      link.href = audio
 
-      // link.download = 'audio.webm';  // the file name you want to save as
-      // document.body.appendChild(link);
-      // link.click();
-      // document.body.removeChild(link);
+      link.download = 'audio.webm';  // the file name you want to save as
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
       // convert blob to wav
       try {
@@ -213,6 +213,8 @@ export default function Page() {
         setScore(res.data.res.output_data)
         setProof(res.data.res.proof)
         setResultDisplay(res.data.res.output_data)
+
+        console.log(res)
 
         // reset
         playback.current = null
