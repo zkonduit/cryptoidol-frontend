@@ -128,28 +128,28 @@ export default function Page() {
   }
 
   const setResultDisplay = (score) => {
-    if (score >= 0 && score < 10) {
+    if (score >= 0 && score < 2) {
       setRating("D")
       setResultMsg("Yoko OnO :(")
     }
-    else if (score >= 10 && score < 20) {
+    else if (score >= 2 && score < 4) {
       setRating("C")
       setResultMsg("Best voice in the world, just not the world I'm living in right now.")
     }
-    else if (score >= 20 && score < 30) {
+    else if (score >= 4 && score < 6) {
       setRating("B")
       setResultMsg("What an average sounding voice :)")
     }
-    else if (score >= 30 && score < 40) {
+    else if (score >= 6 && score < 7) {
       setRating("A")
       setResultMsg("Not bad!")
     }
-    else if (score >= 40 && score < 50) {
+    else if (score >= 7 && score < 8) {
       setRating("S")
       setResultMsg("You did an amazing job!")
     }
     else {
-      setRating("SS")
+      setRating("X")
       setResultMsg("Oh my, what a sexy voice !")
     }
   }
@@ -177,13 +177,13 @@ export default function Page() {
         return
       }
       // download audio file
-      const link = document.createElement('a');
-      link.href = audio
+      // const link = document.createElement('a');
+      // link.href = audio
 
-      link.download = 'audio.webm';  // the file name you want to save as
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // link.download = 'audio.webm';  // the file name you want to save as
+      // document.body.appendChild(link);
+      // link.click();
+      // document.body.removeChild(link);
 
       // convert blob to wav
       try {

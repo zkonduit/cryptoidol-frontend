@@ -9,28 +9,28 @@ import dynamic from 'next/dynamic'
 
 function Card({ score, cycle }) {
   let rating;
-  if (score >= 0 && score < 10) {
+  if (score >= 0 && score < 2) {
     rating = "D"
   }
-  else if (score >= 10 && score < 20) {
+  else if (score >= 2 && score < 4) {
     rating = "C"
   }
-  else if (score >= 20 && score < 30) {
+  else if (score >= 4 && score < 6) {
     rating = "B"
   }
-  else if (score >= 30 && score < 40) {
+  else if (score >= 6 && score < 7) {
     rating = "A"
   }
-  else if (score >= 40 && score < 50) {
+  else if (score >= 7 && score < 8) {
     rating = "S"
   }
   else {
-    rating = "SS"
+    rating = "X"
   }
 
   return (
-    <div className="max-w-sm m-1 p-8 bg-white border border-gray-400 rounded-lg shadow">
-      <h5 className="mb-3 mr-5 ml-5 text-5xl font-bold tracking-tight text-yellow-500">{rating}</h5>
+    <div className="max-w-sm m-1 p-5 bg-white border border-gray-400 rounded-lg shadow">
+      <h5 className="mb-3 text-4xl font-bold tracking-tight text-gray-500">Rank {rating}</h5>
       <p className="mb-3 font-normal text-gray-700">Score: {score.toString()}</p>
       <p className="mt-5 mb-1 font-normal text-gray-700">Season {cycle.toString()}</p>
       {/* <a href="#" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
@@ -80,7 +80,7 @@ function Page() {
   return (
     <>
       <div className='mx-auto flex w-full flex-col flex-wrap items-center md:flex-row  lg:w-4/5'>
-        <div className='flex w-full flex-col items-start justify-center p-6 text-center md:w-3/5 md:text-left'>
+        <div className='flex w-full flex-col items-start justify-center p-6 text-center'>
           <h1 className='mb-6 text-2xl md:text-5xl leading-normal'>Historical Singing Scores</h1>
           <div className='flex w-full flex-row flex-wrap'>
             {
