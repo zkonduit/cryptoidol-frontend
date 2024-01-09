@@ -15,6 +15,7 @@ import {
 import axios from 'axios'
 import addresses from '../data/addresses.json'
 import cryptoIdolABI from '../data/CryptoIdol.json'
+import { hexToNumber } from 'viem'
 
 
 // const Logo = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Logo), { ssr: false })
@@ -46,8 +47,9 @@ export default function Page() {
   const [audioChunks, setAudioChunks] = useState([])
   const [audioBlob, setAudioBlob] = useState(null)
   const [audio, setAudio] = useState(null)
-  const [score, setScore] = useState(0)
-  const [pubInputs, setPubInputs] = useState([])
+  const [score, setScore] = useState("")
+  const [scoreHex, setScoreHex] = useState("")
+  const [instAddress, setInstAddressHex] = useState("")
   const [proof, setProof] = useState("")
   const [rating, setRating] = useState(null)
   const [resultMsg, setResultMsg] = useState(null)
@@ -63,7 +65,7 @@ export default function Page() {
     address: addresses.polygon,
     abi: cryptoIdolABI,
     functionName: 'submitScore',
-    args: [score, '0x' + proof],
+    args: [instAddress, scoreHex, proof],
     enabled: Boolean(proof),
   })
 
@@ -206,11 +208,13 @@ export default function Page() {
           }
         })
 
-        setScore(res.data.res.output_data)
-        setProof(res.data.res.proof)
-        setResultDisplay(res.data.res.output_data)
-
         console.log(res)
+
+        setScoreHex(res.data.outputs[1][0])
+        setScore(hexToNumber(res.data.outputs[1][0]))
+        setInstAddressHex(res.data.outputs[0][0])
+        setProof(res.data.proof)
+        setResultDisplay(score)
 
         // reset
         playback.current = null
@@ -239,7 +243,7 @@ export default function Page() {
       openConnectModal()
     }
 
-    console.log(score)
+    console.log(scoreHex)
     console.log(proof)
     console.log(write)
 
