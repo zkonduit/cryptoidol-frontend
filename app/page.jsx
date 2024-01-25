@@ -47,13 +47,14 @@ export default function Page() {
   const [audioChunks, setAudioChunks] = useState([])
   const [audioBlob, setAudioBlob] = useState(null)
   const [audio, setAudio] = useState(null)
-  const [score, setScore] = useState("")
+  const [score, setScore] = useState(0)
   const [scoreHex, setScoreHex] = useState("")
   const [instAddress, setInstAddressHex] = useState("")
   const [proof, setProof] = useState("")
   const [rating, setRating] = useState(null)
   const [resultMsg, setResultMsg] = useState(null)
   const [mimeType, setMimeType] = useState('audio/webm')
+  const [polling, setPolling] = useState(false)
 
   const playback = useRef(null)
   const { openConnectModal } = useConnectModal()
@@ -79,6 +80,53 @@ export default function Page() {
       setMimeType('audio/mp4')
     }
   }, [mimeType])
+
+  useEffect(() => {
+    const spellId = localStorage.getItem('spell_id');
+
+    if (spellId) {
+        setPolling(true);
+        setState("processing")
+        const intervalId = setInterval(async () => {
+            try {
+                console.log("Polling for results...")
+                const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND}/spell/${spellId}`);
+
+                if (res.data) {
+                    // Assuming the endpoint returns a value that indicates it's time to stop polling
+                    clearInterval(intervalId);
+                    localStorage.removeItem('spell_id')
+                    setPolling(false);
+                    setState("result")
+
+                    // reset
+                    playback.current = null
+                    setAudio(null)
+
+                    // Handle the response data
+                    console.log('Received data: ', res.data)
+                    setScoreHex(res.data.score_hex)
+                    setScore(parseFloat(res.data.score))
+                    setInstAddressHex(res.data.address)
+                    setProof(res.data.proof)
+                    setResultDisplay(parseFloat(res.data.score))
+                }
+            } catch (error) {
+              if (error.response?.status !== 400) {
+                setPolling(false)
+                setState("start")
+                console.error('Error polling endpoint: ', error)
+              } else {
+                console.error('Error polling endpoint: ', error)
+              }
+            }
+        }, 5000); // Poll every 5 seconds, adjust as needed
+
+        return () => clearInterval(intervalId)
+
+      }
+
+  }, [polling]);
 
 
   const startRecord = async () => {
@@ -130,29 +178,26 @@ export default function Page() {
   }
 
   const setResultDisplay = (score) => {
-    if (score >= 0 && score < 2) {
+    console.log(score);
+    if (score >= 0 && score < 0.2) {
       setRating("D")
       setResultMsg("Yoko OnO :(")
     }
-    else if (score >= 2 && score < 4) {
+    else if (score >= 0.2 && score < 4) {
       setRating("C")
       setResultMsg("Best voice in the world, just not the world I'm living in right now.")
     }
-    else if (score >= 4 && score < 6) {
+    else if (score >= 0.4 && score < 0.6) {
       setRating("B")
-      setResultMsg("What an average sounding voice :)")
+      setResultMsg("What an average sounding voice :O")
     }
-    else if (score >= 6 && score < 7) {
+    else if (score >= 0.6 && score < 0.8) {
       setRating("A")
-      setResultMsg("Not bad!")
-    }
-    else if (score >= 7 && score < 8) {
-      setRating("S")
-      setResultMsg("You did an amazing job!")
+      setResultMsg("You are a cut above the rest!")
     }
     else {
-      setRating("X")
-      setResultMsg("Oh my, what a sexy voice !")
+      setRating("S")
+      setResultMsg("Oh my, what a sexy voice! I'm simping for u")
     }
   }
 
@@ -208,18 +253,13 @@ export default function Page() {
           }
         })
 
-        console.log(res)
+        console.log(res);
 
-        setScoreHex(res.data.outputs[1][0])
-        setScore(hexToNumber(res.data.outputs[1][0]))
-        setInstAddressHex(res.data.outputs[0][0])
-        setProof(res.data.proof)
-        setResultDisplay(score)
+        localStorage.setItem("spell_id", res.data.id);
 
-        // reset
-        playback.current = null
-        setAudio(null)
-        setState("result")
+        setState("processing")
+        setPolling(true)
+
       }
       catch(err) {
         alert(err);
@@ -294,6 +334,16 @@ export default function Page() {
             state === "processing" && !recording &&
             <>
             <h1 className='my-2 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️Computing results and zkml proof 🤖...</h1>
+            <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
+              onClick={(e) => {
+                e.preventDefault()
+                localStorage.removeItem("spell_id")
+                setPolling(false)
+                setState("start")
+              }}
+            >
+              CANCEL
+            </button>
             </>
           }
 
