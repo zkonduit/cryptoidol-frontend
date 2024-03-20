@@ -8,10 +8,10 @@ export const Common = ({ color }) => (
   <Suspense fallback={null}>
     {color && <color attach='background' args={[color]} />}
     <ambientLight intensity={0.2} />
-    <pointLight position={[5, 5, 5]} intensity={0.4} />
-    <pointLight position={[1, 2, 2]} intensity={0.2} />
-    <pointLight position={[-5, -5, -5]} intensity={0.2} />
-    <PerspectiveCamera makeDefault fov={40} position={[0, 0, 6]} />
+    <pointLight position={[5, 5, 5]} intensity={0.3} />
+    <pointLight position={[1, 2, 2]} intensity={0.3} />
+    <pointLight position={[-5, 5, -5]} intensity={0.3} />
+    <PerspectiveCamera makeDefault fov={80} position={[0, -0.4, 5.2]} />
   </Suspense>
 )
 

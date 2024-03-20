@@ -59,8 +59,10 @@ export default function Avatar ({
     // load 3d model
     loader.load(
 
-      '/3D/Ailis.vrm',
-
+      // Ailis
+      // '/3D/Ailis.vrm',
+      // Smaller Model
+      '/3D/smaller.vrm',
       ( gltf ) => {
 
         setGltf(gltf)
@@ -80,7 +82,7 @@ export default function Avatar ({
           obj.frustumCulled = false
         })
 
-        console.log(vrm)
+        // console.log(vrm)
         // setLookAtTarget(new THREE.Object3D);
         // vrm.lookAt.target = lookAtTarget
         setVrm(vrm)
@@ -190,5 +192,5 @@ export default function Avatar ({
   })
 
   if (gltf)
-    return <primitive object={gltf.scene} {...props} />
+    return <primitive object={gltf.scene}  {...props} />
 }
