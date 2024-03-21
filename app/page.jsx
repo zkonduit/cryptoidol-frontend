@@ -82,20 +82,20 @@ export default function Page() {
   }, [mimeType])
 
   useEffect(() => {
-    const spellId = localStorage.getItem('spell_id');
+    const recipeId = localStorage.getItem('recipe_id');
 
-    if (spellId) {
+    if (recipeId) {
         setPolling(true);
         setState("processing")
         const intervalId = setInterval(async () => {
             try {
                 console.log("Polling for results...")
-                const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND}/spell/${spellId}`);
+                const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND}/recipe/${recipeId}`);
 
                 if (res.data) {
                     // Assuming the endpoint returns a value that indicates it's time to stop polling
                     clearInterval(intervalId);
-                    localStorage.removeItem('spell_id')
+                    localStorage.removeItem('recipe_id')
                     setPolling(false);
                     setState("result")
 
@@ -120,7 +120,7 @@ export default function Page() {
                 console.error('Error polling endpoint: ', error)
               }
             }
-        }, 5000); // Poll every 5 seconds, adjust as needed
+        }, 10000); // Poll every 5 seconds, adjust as needed
 
         return () => clearInterval(intervalId)
 
@@ -255,7 +255,7 @@ export default function Page() {
 
         console.log(res);
 
-        localStorage.setItem("spell_id", res.data.id);
+        localStorage.setItem("recipe_id", res.data.id);
 
         setState("processing")
         setPolling(true)
@@ -337,7 +337,7 @@ export default function Page() {
             <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
               onClick={(e) => {
                 e.preventDefault()
-                localStorage.removeItem("spell_id")
+                localStorage.removeItem("recipe_id")
                 setPolling(false)
                 setState("start")
               }}
