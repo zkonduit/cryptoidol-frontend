@@ -179,25 +179,32 @@ export default function Page() {
 
   const setResultDisplay = (score) => {
     console.log(score);
-    if (score >= 0 && score < 0.2) {
+    if (score === 0) {
       setRating("D")
       setResultMsg("Yoko OnO :(")
     }
-    else if (score >= 0.2 && score < 4) {
-      setRating("C")
+    else if (score === 1) {
+      setRating("D")
       setResultMsg("Best voice in the world, just not the world I'm living in right now.")
     }
-    else if (score >= 0.4 && score < 0.6) {
-      setRating("B")
+    else if (score === 2) {
+      setRating("C")
       setResultMsg("What an average sounding voice :O")
     }
-    else if (score >= 0.6 && score < 0.8) {
-      setRating("A")
+    else if (score === 3) {
+      setRating("B")
       setResultMsg("You are a cut above the rest!")
     }
-    else {
+    else if (score === 4) {
+      setRating("A")
+      setResultMsg("You are so amazing!")
+    }
+    else if (score >= 5) {
       setRating("S")
       setResultMsg("Oh my, what a sexy voice! I'm simping for u")
+    } else {
+      setRating("?")
+      setResultMsg("Something went wrong! Could you please inform the devs?")
     }
   }
 
@@ -243,8 +250,6 @@ export default function Page() {
         if (mimeType === "audio/mp4") {
           formData.append('audio', audioBlob, 'audio.mp3')
         }
-
-        formData.append('address', address)
 
         setState("processing")
         let res = await axios.post(process.env.NEXT_PUBLIC_BACKEND + `/prove`, formData, {
@@ -353,7 +358,7 @@ export default function Page() {
               <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
                 <strong>Score: {rating}.</strong> {resultMsg}
               </h1>
-              { !isSuccess &&
+              { !isSuccess && rating !== "?" &&
                 <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
                   disabled={isLoading}
                   onClick={(e) => {
@@ -361,7 +366,9 @@ export default function Page() {
                     publishOnchain()
                   }}
                 >
-                  {isLoading ? "SUBITTING..." : "SUBMIT ONCHAIN" }
+                  {
+                    isLoading ? "SUBITTING..." : "SUBMIT ONCHAIN"
+                  }
                 </button>
               }
               { isSuccess &&
