@@ -180,7 +180,7 @@ export default function Page() {
   const setResultDisplay = (score) => {
     console.log(score);
     if (score === 0) {
-      setRating("D")
+      setRating("E")
       setResultMsg("Yoko OnO :(")
     }
     else if (score === 1) {
@@ -369,6 +369,16 @@ export default function Page() {
                   {
                     isLoading ? "SUBITTING..." : "SUBMIT ONCHAIN"
                   }
+                </button>
+              }
+              { !isSuccess && rating === "?" &&
+                <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    restart()
+                  }}
+                >
+                  RESTART
                 </button>
               }
               { isSuccess &&
