@@ -13,13 +13,12 @@ import {
 import { configureChains, createConfig, WagmiConfig } from 'wagmi';
 import {
   mainnet,
-  polygon,
-  polygonMumbai,
+  sepolia,
 } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 
 const { chains, publicClient } = configureChains(
-  [polygon, polygonMumbai],
+  [sepolia],
   [publicProvider()]
 );
 
