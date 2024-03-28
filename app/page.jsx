@@ -338,7 +338,7 @@ export default function Page() {
           {
             state === "processing" && !recording &&
             <>
-            <h1 className='my-2 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️Computing results and zkml proof 🤖...</h1>
+            <h1 className='my-2 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️Computing results and zkml proof 🤖... Please give me a min or more</h1>
             <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
               onClick={(e) => {
                 e.preventDefault()
