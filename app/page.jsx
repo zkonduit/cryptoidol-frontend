@@ -41,6 +41,13 @@ const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.
 const Common = dynamic(() => import('@/components/canvas/View').then((mod) => mod.Common), { ssr: false })
 
 export default function Page() {
+  //                                            replay
+  //                                              ( )
+  // start --click record--> inprogress --stop--> end --submit--> processing --receive callback (append proof, score, scoreHex, isCommitted = false) --> result --> committing --> committed --> minting --> minted (end)
+  // |  ^-------------------restart----------------|                   ^
+  // |___________________if recipe_id in localstorage__________________|
+  //
+  //
   const [state, setState] = useState("start")
   const [recording, setRecording] = useState(false)
   const [stream, setStream] = useState(null)
@@ -49,8 +56,8 @@ export default function Page() {
   const [audio, setAudio] = useState(null)
   const [score, setScore] = useState(0)
   const [scoreHex, setScoreHex] = useState("")
-  const [instAddress, setInstAddressHex] = useState("")
   const [proof, setProof] = useState("")
+  const [committed, setCommitted] = useState(false)
   const [rating, setRating] = useState(null)
   const [resultMsg, setResultMsg] = useState(null)
   const [mimeType, setMimeType] = useState('audio/webm')
@@ -67,25 +74,27 @@ export default function Page() {
 
   console.log(chain);
 
-  const commitData = usePrepareContractWrite({
-    address: addresses.sepolia,
-    abi: cryptoIdolABI,
-    functionName: 'commitResult',
-    args: [keccak256(encodePacked(proof, scoreHex))],
-    enabled: Boolean(proof) && Boolean(scoreHex),
-  })
+  if (chain?.id === 11155111) {
+    const commitData = usePrepareContractWrite({
+      address: addresses.sepolia,
+      abi: cryptoIdolABI,
+      functionName: 'commitResult',
+      args: [keccak256(encodePacked(proof, scoreHex))],
+      enabled: Boolean(proof) && Boolean(scoreHex),
+    })
 
-  commitConfig = commitData.config
+    commitConfig = commitData.config
 
-  const mintData = usePrepareContractWrite({
-    address: addresses.sepolia,
-    abi: cryptoIdolABI,
-    functionName: 'mint',
-    args: [proof, [scoreHex]],
-    enabled: Boolean(proof) && Boolean(scoreHex),
-  })
+    const mintData = usePrepareContractWrite({
+      address: addresses.sepolia,
+      abi: cryptoIdolABI,
+      functionName: 'mint',
+      args: [proof, [scoreHex]],
+      enabled: Boolean(proof) && Boolean(scoreHex),
+    })
 
-  mintConfig = mintData.config
+    mintConfig = mintData.config
+  }
 
   const commitPhase = useContractWrite(commitConfig)
   const mintPhase = useContractWrite(mintConfig)
@@ -100,7 +109,9 @@ export default function Page() {
   }, [mimeType])
 
   useEffect(() => {
-    const recipeId = localStorage.getItem('recipe_id');
+    const recipeId = localStorage.getItem('recipe_id')
+    const proof = localStorage.getItem("proof")
+    const score = localStorage.getItem("score")
 
     if (recipeId) {
         setPolling(true);
@@ -130,8 +141,7 @@ export default function Page() {
                     setResultDisplay(parseFloat(res.data.score))
 
                     localStorage.setItem("proof", res.data.proof)
-                    localStorage.setItem("score", res.data.score)
-                    localStorage.setItem("committed", false)
+                    localStorage.setItem("score", res.data.scoreHex)
                 }
             } catch (error) {
               if (error.response?.status !== 400) {
@@ -146,6 +156,13 @@ export default function Page() {
 
         return () => clearInterval(intervalId)
 
+      } else {
+        if (proof && score) {
+          // if there's proof and score check if the proof and score is already on chain
+          setState("committing")
+          // else if it is already committed go to mint
+          setState("minting")
+        }
       }
 
   }, [polling]);
@@ -315,7 +332,9 @@ export default function Page() {
     console.log("keccak: ", keccak256(encodePacked(proof, score)))
     console.log(write)
 
-    commitPhase.write?.()
+    commitPhase.write?.().then(() => {
+      setState("committing")
+    })
   }
 
   return (
@@ -389,9 +408,7 @@ export default function Page() {
                     commitResult()
                   }}
                 >
-                  {
-                    commitPhase.isLoading ? "COMMITTING..." : "COMMIT RESULTS"
-                  }
+                  COMMIT RESULTS
                 </button>
               }
               { !commitPhase.isSuccess && rating === "?" &&
@@ -404,76 +421,87 @@ export default function Page() {
                   RESTART
                 </button>
               }
-              { commitPhase.isSuccess &&
-                <>
-                  <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
-                    disabled={commitPhase.isLoading}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      mint()
-                    }}
-                  >
-                    {
-                      commitPhase.isLoading ? "COMMITTING..." : "COMMIT RESULTS"
-                    }
+            </>
+          }
+          {
+            state === "committing" &&
+            <>
+              <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
+                Committing results onchain...
+              </h1>
+            </>
+          }
+
+          { state === "committed" &&
+            <>
+              <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
+                disabled={commitPhase.isLoading}
+                onClick={(e) => {
+                  e.preventDefault()
+                  mint()
+                }}
+              >
+                MINT
+              </button>
+            </>
+          }
+          {
+            <>
+              <h3 className="mb-1">
+                Share On Socials
+              </h3>
+              <div>
+                <a
+                  href="https://www.linkedin.com/sharing/share-offsite/?url=https://cryptoidol.tech"
+                  aria-label="Share on LinkedIn"
+                  target="_blank" rel="noopener noreferrer"
+                >
+                  <button
+                    type="button"
+                    data-te-ripple-init
+                    data-te-ripple-color="light"
+                    className="mb-2 inline-block rounded ml-1 mr-1 px-6 py-4 text-xs font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
+                    style={{backgroundColor: "#0077b5"}}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24">
+                      <path
+                        d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z" />
+                    </svg>
                   </button>
-                </>
-                //   <h3 className="mb-1">
-                //     Share On Socials
-                //   </h3>
-                //   <div>
-                //     <a
-                //       href="https://www.linkedin.com/sharing/share-offsite/?url=https://cryptoidol.tech"
-                //       aria-label="Share on LinkedIn"
-                //       target="_blank" rel="noopener noreferrer"
-                //     >
-                //       <button
-                //         type="button"
-                //         data-te-ripple-init
-                //         data-te-ripple-color="light"
-                //         className="mb-2 inline-block rounded ml-1 mr-1 px-6 py-4 text-xs font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
-                //         style={{backgroundColor: "#0077b5"}}>
-                //         <svg
-                //           xmlns="http://www.w3.org/2000/svg"
-                //           className="h-4 w-4"
-                //           fill="currentColor"
-                //           viewBox="0 0 24 24">
-                //           <path
-                //             d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z" />
-                //         </svg>
-                //       </button>
-                //     </a>
-                //     <a
-                //       href="https://twitter.com/intent/tweet?text=I%20have%20participated%20in%20CryptoIdol.%20Have%20you?%20https://cryptoidol.tech"
-                //       aria-label="Share On Twitter"
-                //       target="_blank" rel="noopener noreferrer"
-                //     >
-                //       <button
-                //         type="button"
-                //         data-te-ripple-init
-                //         data-te-ripple-color="light"
-                //         className="mb-2 inline-block rounded ml-1 mr-1 px-6 py-4 text-xs font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
-                //         style={{backgroundColor: "#1da1f2"}}>
-                //         <svg
-                //           xmlns="http://www.w3.org/2000/svg"
-                //           className="h-4 w-4"
-                //           fill="currentColor"
-                //           viewBox="0 0 24 24">
-                //           <path
-                //             d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
-                //       </svg>
-                //     </button>
-                //   </a>
-                // </div>
-                // /* <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
-                //   onClick={(e) => {
-                //     e.preventDefault()
-                //     restart()
-                //   }}
-                // >
-                //   RESTART
-                // </button> */
-              }
+                </a>
+                <a
+                  href="https://twitter.com/intent/tweet?text=I%20have%20just%20minted%20a%20CryptoIdol.%20Have%20you?%20https://cryptoidol.tech"
+                  aria-label="Share On Twitter"
+                  target="_blank" rel="noopener noreferrer"
+                >
+                  <button
+                    type="button"
+                    data-te-ripple-init
+                    data-te-ripple-color="light"
+                    className="mb-2 inline-block rounded ml-1 mr-1 px-6 py-4 text-xs font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
+                    style={{backgroundColor: "#1da1f2"}}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24">
+                      <path
+                        d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
+                  </svg>
+                </button>
+              </a>
+              </div>
+              <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
+                onClick={(e) => {
+                  e.preventDefault()
+                  restart()
+                }}
+              >
+                RESTART
+              </button>
             </>
           }
 
