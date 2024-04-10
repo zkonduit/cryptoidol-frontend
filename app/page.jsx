@@ -458,7 +458,7 @@ export default function Page() {
               </button>
             </>
           }
-          {
+          { state === "minted" &&
             <>
               <h3 className="mb-1">
                 Share On Socials
