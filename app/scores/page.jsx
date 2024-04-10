@@ -75,7 +75,7 @@ function Page() {
       }
       setUpdatedData(tempData)
     }
-  }, [data])
+  }, [data, isError, isLoading])
 
   return (
     <>

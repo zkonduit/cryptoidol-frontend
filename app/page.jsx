@@ -74,27 +74,25 @@ export default function Page() {
 
   console.log(chain);
 
-  if (chain?.id === 11155111) {
-    const commitData = usePrepareContractWrite({
-      address: addresses.sepolia,
-      abi: cryptoIdolABI,
-      functionName: 'commitResult',
-      args: [keccak256(encodePacked(proof, scoreHex))],
-      enabled: Boolean(proof) && Boolean(scoreHex),
-    })
+  const commitData = usePrepareContractWrite({
+    address: chain?.id === 11155111 ? addresses.sepolia : null,
+    abi: cryptoIdolABI,
+    functionName: 'commitResult',
+    args: [keccak256(encodePacked(proof, scoreHex))],
+    enabled: Boolean(proof) && Boolean(scoreHex),
+  })
 
-    commitConfig = commitData.config
+  commitConfig = commitData.config
 
-    const mintData = usePrepareContractWrite({
-      address: addresses.sepolia,
-      abi: cryptoIdolABI,
-      functionName: 'mint',
-      args: [proof, [scoreHex]],
-      enabled: Boolean(proof) && Boolean(scoreHex),
-    })
+  const mintData = usePrepareContractWrite({
+    address: chain?.id === 11155111 ? addresses.sepolia : null,
+    abi: cryptoIdolABI,
+    functionName: 'mint',
+    args: [proof, [scoreHex]],
+    enabled: Boolean(proof) && Boolean(scoreHex),
+  })
 
-    mintConfig = mintData.config
-  }
+  mintConfig = mintData.config
 
   const commitPhase = useContractWrite(commitConfig)
   const mintPhase = useContractWrite(mintConfig)
@@ -161,7 +159,7 @@ export default function Page() {
           // if there's proof and score check if the proof and score is already on chain
           setState("committing")
           // else if it is already committed go to mint
-          setState("minting")
+          // setState("minting")
         }
       }
 
@@ -334,6 +332,21 @@ export default function Page() {
 
     commitPhase.write?.().then(() => {
       setState("committing")
+    })
+  }
+
+  const mint = () => {
+    if(!isConnected) {
+      openConnectModal()
+    }
+
+    console.log("proof: ", proof)
+    console.log("score: ", scoreHex)
+    console.log("keccak: ", keccak256(encodePacked(proof, score)))
+    console.log(write)
+
+    mint.write?.().then(() => {
+      setState("minting")
     })
   }
 
