@@ -10,12 +10,12 @@ import {
   useNetwork,
   usePrepareContractWrite,
   useContractWrite,
-  useWaitForTransaction
+  useTransaction
 } from 'wagmi'
 import axios from 'axios'
 import addresses from '../data/addresses.json'
 import cryptoIdolABI from '../data/CryptoIdol.json'
-import { keccak256, encodePacked } from 'viem'
+import { keccak256, encodePacked, parseEther } from 'viem'
 
 
 // const Logo = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Logo), { ssr: false })
@@ -43,7 +43,7 @@ const Common = dynamic(() => import('@/components/canvas/View').then((mod) => mo
 export default function Page() {
   //                                            replay
   //                                              ( )
-  // start --click record--> inprogress --stop--> end --submit--> processing --receive callback (append proof, score, scoreHex, isCommitted = false) --> result --> committing --> committed --> minting --> minted (end)
+  // start --click record--> inprogress --stop--> end --submit--> processing --receive callback (append proof, score, scoreHex, isCommitted = false) --> result --> committing --> mint --> minting --> minted (end)
   // |  ^-------------------restart----------------|                   ^
   // |___________________if recipe_id in localstorage__________________|
   //
@@ -55,13 +55,16 @@ export default function Page() {
   const [audioBlob, setAudioBlob] = useState(null)
   const [audio, setAudio] = useState(null)
   const [score, setScore] = useState(0)
-  const [scoreHex, setScoreHex] = useState("")
-  const [proof, setProof] = useState("")
+  const [scoreHex, setScoreHex] = useState(null)
+  const [proof, setProof] = useState(null)
   const [committed, setCommitted] = useState(false)
   const [rating, setRating] = useState(null)
   const [resultMsg, setResultMsg] = useState(null)
   const [mimeType, setMimeType] = useState('audio/webm')
   const [polling, setPolling] = useState(false)
+  const [commitTxId, setCommitTxId] = useState(null)
+  const [mintTxId, setMintTxId] = useState(null)
+
 
   const playback = useRef(null)
   const { openConnectModal } = useConnectModal()
@@ -72,14 +75,22 @@ export default function Page() {
   let commitConfig;
   let mintConfig;
 
-  console.log(chain);
-
   const commitData = usePrepareContractWrite({
     address: chain?.id === 11155111 ? addresses.sepolia : null,
     abi: cryptoIdolABI,
     functionName: 'commitResult',
-    args: [keccak256(encodePacked(proof, scoreHex))],
-    enabled: Boolean(proof) && Boolean(scoreHex),
+    args: [
+      keccak256(
+        encodePacked(
+          ['bytes', 'uint256'],
+          [
+            proof || "0x0000000000000000000000000000000000000000000000000000000000000000",
+            scoreHex || "0x0000000000000000000000000000000000000000000000000000000000000000"
+          ]
+        )
+      )
+    ],
+    enabled: Boolean(proof) && Boolean(scoreHex)
   })
 
   commitConfig = commitData.config
@@ -88,14 +99,26 @@ export default function Page() {
     address: chain?.id === 11155111 ? addresses.sepolia : null,
     abi: cryptoIdolABI,
     functionName: 'mint',
+    value: parseEther("0.01"),
     args: [proof, [scoreHex]],
-    enabled: Boolean(proof) && Boolean(scoreHex),
+    enabled: Boolean(proof) && Boolean(scoreHex)
   })
 
   mintConfig = mintData.config
 
   const commitPhase = useContractWrite(commitConfig)
+  const commitTx = useTransaction({
+    chainId: chain?.id,
+    hash: commitTxId
+  })
+  console.log("commitTx: ", commitTx)
+
   const mintPhase = useContractWrite(mintConfig)
+  const mintTx = useTransaction({
+    chainId: chain?.id,
+    hash: mintTxId
+  })
+  console.log("mintTx: ", mintTx)
 
   useEffect(() => {
     if (MediaRecorder.isTypeSupported('audio/webm')) {
@@ -109,7 +132,10 @@ export default function Page() {
   useEffect(() => {
     const recipeId = localStorage.getItem('recipe_id')
     const proof = localStorage.getItem("proof")
-    const score = localStorage.getItem("score")
+    const score = parseInt(localStorage.getItem("score"))
+    const scoreHex = localStorage.getItem("scoreHex")
+    const commitTxId = localStorage.getItem("commitTxId")
+    const mintTxId = localStorage.getItem("mintTxId")
 
     if (recipeId) {
         setPolling(true);
@@ -134,12 +160,12 @@ export default function Page() {
                     console.log('Received data: ', res.data)
                     setScoreHex(res.data.score_hex)
                     setScore(parseFloat(res.data.score))
-                    setInstAddressHex(res.data.address)
                     setProof(res.data.proof)
                     setResultDisplay(parseFloat(res.data.score))
 
                     localStorage.setItem("proof", res.data.proof)
-                    localStorage.setItem("score", res.data.scoreHex)
+                    localStorage.setItem("score", res.data.score)
+                    localStorage.setItem("scoreHex", res.data.score_hex)
                 }
             } catch (error) {
               if (error.response?.status !== 400) {
@@ -154,17 +180,78 @@ export default function Page() {
 
         return () => clearInterval(intervalId)
 
-      } else {
-        if (proof && score) {
-          // if there's proof and score check if the proof and score is already on chain
+    } else {
+      if (proof && scoreHex) {
+        setState("result")
+        setScore(score)
+        setScoreHex(scoreHex)
+        setProof(proof)
+        setResultDisplay(score)
+      }
+      if (commitTxId) {
+        setCommitTxId(commitTxId)
+        if (commitTx.isSuccess) {
+          setState("mint")
+        }
+
+        if (commitTx.isLoading) {
           setState("committing")
-          // else if it is already committed go to mint
-          // setState("minting")
+        }
+
+        if (commitTx.isError) {
+          setState("commit")
         }
       }
+      if (mintTxId) {
+        setMintTxId(mintTxId)
 
-  }, [polling]);
+        if (mintTx.isSuccess) {
+          setState("minted")
+        }
 
+        if (mintTx.isLoading) {
+          setState("minted")
+        }
+
+        if (mintTx.isError) {
+          setState("mint")
+        }
+      }
+    }
+
+  }, [polling, proof, score, scoreHex, commitTxId, mintTxId]);
+
+  // handle commit Phase
+  useEffect(() => {
+    if (commitPhase.isError) {
+      setState("result")
+    }
+
+    if (commitPhase.data) {
+      setCommitTxId(commitPhase.data.hash)
+      localStorage.setItem("commitTxId", commitPhase.data.hash)
+    }
+
+    if (commitPhase.isSuccess) {
+      setState("mint")
+    }
+
+  }, [commitPhase.isSuccess, commitPhase.data, commitPhase.isError])
+
+  useEffect(() => {
+    if (mintPhase.isError) {
+      setState("mint")
+    }
+
+    if (mintPhase.data) {
+      setMintTxId(data.hash)
+      localStorage.setItem("mintTxId", mintPhase.data.hash)
+    }
+
+    if (mintPhase.isSuccess) {
+      setState("minted")
+    }
+  }, [mintPhase.isSuccess, mintPhase.data, mintPhase.isError])
 
   const startRecord = async () => {
     if ("MediaRecorder" in window) {
@@ -318,36 +405,52 @@ export default function Page() {
     playback.current = null
     setAudio(null)
     setState("start")
+    localStorage.removeItem("recipe_id")
+    localStorage.removeItem("score")
+    localStorage.removeItem("scoreHex")
+    localStorage.removeItem("proof")
+    localStorage.removeItem("commitTxId")
+    localStorage.removeItem("mintTxId")
   }
 
-  const commitResult = () => {
+  const commitResult = async () => {
     if(!isConnected) {
       openConnectModal()
     }
 
     console.log("proof: ", proof)
     console.log("score: ", scoreHex)
-    console.log("keccak: ", keccak256(encodePacked(proof, score)))
-    console.log(write)
+    console.log("keccak: ", keccak256(encodePacked(['bytes', 'uint256'], [proof, score])))
+    console.log("commit data: ", commitPhase)
 
-    commitPhase.write?.().then(() => {
-      setState("committing")
-    })
+    try {
+      const commitWrite = await commitPhase.writeAsync?.()
+      console.log(commitWrite)
+    }
+    catch (err) {
+      console.log(err)
+      return
+    }
+    setState("committing")
   }
 
-  const mint = () => {
+  const mint = async () => {
     if(!isConnected) {
       openConnectModal()
     }
 
     console.log("proof: ", proof)
     console.log("score: ", scoreHex)
-    console.log("keccak: ", keccak256(encodePacked(proof, score)))
     console.log(write)
 
-    mint.write?.().then(() => {
-      setState("minting")
-    })
+    try {
+      await mintPhase.write()
+    }
+    catch (err) {
+      console.log(err)
+      return
+    }
+    setState("minting")
   }
 
   return (
@@ -424,16 +527,14 @@ export default function Page() {
                   COMMIT RESULTS
                 </button>
               }
-              { !commitPhase.isSuccess && rating === "?" &&
-                <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    restart()
-                  }}
-                >
-                  RESTART
-                </button>
-              }
+              <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
+                onClick={(e) => {
+                  e.preventDefault()
+                  restart()
+                }}
+              >
+                RESTART
+              </button>
             </>
           }
           {
@@ -444,11 +545,9 @@ export default function Page() {
               </h1>
             </>
           }
-
-          { state === "committed" &&
+          { state === "mint" &&
             <>
               <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
-                disabled={commitPhase.isLoading}
                 onClick={(e) => {
                   e.preventDefault()
                   mint()
@@ -456,6 +555,14 @@ export default function Page() {
               >
                 MINT
               </button>
+            </>
+          }
+          {
+            state === "minting" &&
+            <>
+              <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
+                Minting a CryptoIdol...
+              </h1>
             </>
           }
           { state === "minted" &&

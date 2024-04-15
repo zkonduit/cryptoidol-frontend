@@ -159,6 +159,22 @@ export default function Avatar ({
         setAnimationUrl(PREFIX + 'Thankful.fbx')
       }
 
+      if (avatarState == 'committing') {
+        setAnimationUrl(PREFIX + 'Gangnam Style.fbx')
+      }
+
+      if (avatarState == 'mint') {
+        setAnimationUrl(PREFIX + 'Button Pushing.fbx')
+      }
+
+      if (avatarState == 'minting') {
+        setAnimationUrl(PREFIX + 'Gangnam Style.fbx')
+      }
+
+      if (avatarState == 'minted') {
+        setAnimationUrl(PREFIX + 'Thankful.fbx')
+      }
+
 
       // handle blink
       if (blink) {
