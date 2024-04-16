@@ -1,8 +1,9 @@
-import { useAccount } from 'wagmi'
+import { useAccount, useNetwork } from 'wagmi'
 import dynamic from 'next/dynamic'
 
 function Footer() {
   const { address, isConnected } = useAccount()
+  const { chain } = useNetwork()
 
   return (
     <footer className="fixed bottom-0 left-0 z-20 w-full pl-3 pr-3 pt-1.5 pb-1.5 bg-white border-t border-gray-200 shadow md:flex md:items-center md:justify-between md:p-3">
@@ -11,7 +12,7 @@ function Footer() {
           <a href="/" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Sing to Mint</a>
         </li>
         {
-          isConnected &&
+          isConnected && chain.id === 11155111 &&
           <li>
             <a target="_blank" href="#" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Collection</a>
           </li>

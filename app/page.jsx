@@ -120,7 +120,7 @@ export default function Page() {
     chainId: chain?.id,
     hash: mintTxId
   })
-  console.log("mintTx: ", mintTx)
+  // console.log("mintTx: ", mintTx)
 
   useEffect(() => {
     if (MediaRecorder.isTypeSupported('audio/webm')) {
