@@ -10,12 +10,12 @@ import {
   useNetwork,
   usePrepareContractWrite,
   useContractWrite,
-  useTransaction
+  useWaitForTransaction
 } from 'wagmi'
 import axios from 'axios'
 import addresses from '../data/addresses.json'
 import cryptoIdolABI from '../data/CryptoIdol.json'
-import { keccak256, encodePacked, parseEther } from 'viem'
+import { keccak256, encodeAbiParameters, parseEther } from 'viem'
 
 
 // const Logo = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Logo), { ssr: false })
@@ -75,25 +75,33 @@ export default function Page() {
   let commitConfig;
   let mintConfig;
 
+  const commitTx = useWaitForTransaction({
+    chainId: chain?.id,
+    hash: commitTxId,
+  })
+  // console.log("commitTx: ", commitTx)
+
   const commitData = usePrepareContractWrite({
     address: chain?.id === 11155111 ? addresses.sepolia : null,
     abi: cryptoIdolABI,
     functionName: 'commitResult',
     args: [
       keccak256(
-        encodePacked(
-          ['bytes', 'uint256'],
+        encodeAbiParameters(
+          [{ type: 'bytes' }, { type: 'uint256[]' }],
           [
             proof || "0x0000000000000000000000000000000000000000000000000000000000000000",
-            scoreHex || "0x0000000000000000000000000000000000000000000000000000000000000000"
+            score ? [scoreHex] : ["0x0000000000000000000000000000000000000000000000000000000000000000"]
           ]
         )
       )
     ],
-    enabled: Boolean(proof) && Boolean(scoreHex)
+    enabled: Boolean(proof) && Boolean(scoreHex) && !commitTx.data?.blockHash
   })
 
   commitConfig = commitData.config
+
+  const commitPhase = useContractWrite(commitConfig)
 
   const mintData = usePrepareContractWrite({
     address: chain?.id === 11155111 ? addresses.sepolia : null,
@@ -101,20 +109,14 @@ export default function Page() {
     functionName: 'mint',
     value: parseEther("0.01"),
     args: [proof, [scoreHex]],
-    enabled: Boolean(proof) && Boolean(scoreHex)
+    enabled: Boolean(proof) && Boolean(scoreHex) && Boolean(commitTxId) && Boolean(commitTx.data?.blockHash)
   })
 
   mintConfig = mintData.config
 
-  const commitPhase = useContractWrite(commitConfig)
-  const commitTx = useTransaction({
-    chainId: chain?.id,
-    hash: commitTxId
-  })
-  console.log("commitTx: ", commitTx)
 
   const mintPhase = useContractWrite(mintConfig)
-  const mintTx = useTransaction({
+  const mintTx = useWaitForTransaction({
     chainId: chain?.id,
     hash: mintTxId
   })
@@ -190,6 +192,7 @@ export default function Page() {
       }
       if (commitTxId) {
         setCommitTxId(commitTxId)
+
         if (commitTx.isSuccess) {
           setState("mint")
         }
@@ -210,7 +213,7 @@ export default function Page() {
         }
 
         if (mintTx.isLoading) {
-          setState("minted")
+          setState("mint")
         }
 
         if (mintTx.isError) {
@@ -219,7 +222,7 @@ export default function Page() {
       }
     }
 
-  }, [polling, proof, score, scoreHex, commitTxId, mintTxId]);
+  }, [polling, proof, score, scoreHex, commitTxId, commitTx.data, mintTxId, mintTx.data]);
 
   // handle commit Phase
   useEffect(() => {
@@ -244,7 +247,7 @@ export default function Page() {
     }
 
     if (mintPhase.data) {
-      setMintTxId(data.hash)
+      setMintTxId(mintPhase.data.hash)
       localStorage.setItem("mintTxId", mintPhase.data.hash)
     }
 
@@ -302,7 +305,6 @@ export default function Page() {
   }
 
   const setResultDisplay = (score) => {
-    console.log(score);
     if (score === 0) {
       setRating("E")
       setResultMsg("Yoko OnO :(")
@@ -420,7 +422,7 @@ export default function Page() {
 
     console.log("proof: ", proof)
     console.log("score: ", scoreHex)
-    console.log("keccak: ", keccak256(encodePacked(['bytes', 'uint256'], [proof, score])))
+    console.log("keccak: ", keccak256(encodeAbiParameters([{ type: 'bytes' }, { type: 'uint256[]' } ], [proof, [score]])))
     console.log("commit data: ", commitPhase)
 
     try {
@@ -441,10 +443,11 @@ export default function Page() {
 
     console.log("proof: ", proof)
     console.log("score: ", scoreHex)
-    console.log(write)
+    console.log("mint data: ", mintPhase)
 
     try {
-      await mintPhase.write()
+      const mintWrite = await mintPhase.writeAsync?.()
+      console.log(mintWrite)
     }
     catch (err) {
       console.log(err)
@@ -543,17 +546,36 @@ export default function Page() {
               <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
                 Committing results onchain...
               </h1>
+              <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
+                onClick={(e) => {
+                  e.preventDefault()
+                  restart()
+                }}
+              >
+                RESTART
+              </button>
             </>
           }
           { state === "mint" &&
             <>
+              <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
+                Audio data has been committed onchain you may now mint!
+              </h1>
               <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
                 onClick={(e) => {
                   e.preventDefault()
                   mint()
                 }}
               >
-                MINT
+                MINT (0.01 ETH)
+              </button>
+              <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
+                onClick={(e) => {
+                  e.preventDefault()
+                  restart()
+                }}
+              >
+                RESTART
               </button>
             </>
           }
@@ -563,6 +585,14 @@ export default function Page() {
               <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
                 Minting a CryptoIdol...
               </h1>
+              <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
+                onClick={(e) => {
+                  e.preventDefault()
+                  restart()
+                }}
+              >
+                RESTART
+              </button>
             </>
           }
           { state === "minted" &&
