@@ -213,7 +213,7 @@ export default function Page() {
         }
 
         if (mintTx.isLoading) {
-          setState("mint")
+          setState("minting")
         }
 
         if (mintTx.isError) {
@@ -519,7 +519,7 @@ export default function Page() {
               <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
                 <strong>Score: {rating}.</strong> {resultMsg}
               </h1>
-              { !commitPhase.isSuccess && rating !== "?" &&
+              { rating !== "?" &&
                 <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
                   disabled={commitPhase.isLoading}
                   onClick={(e) => {
@@ -559,7 +559,7 @@ export default function Page() {
           { state === "mint" &&
             <>
               <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
-                Audio data has been committed onchain you may now mint!
+                Audio data has been committed onchain you may now mint and turn your voice into a CryptoIdol!
               </h1>
               <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
                 onClick={(e) => {
@@ -583,7 +583,7 @@ export default function Page() {
             state === "minting" &&
             <>
               <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
-                Minting a CryptoIdol...
+                Turning your voice into dynamic onchain art...
               </h1>
               <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
                 onClick={(e) => {
