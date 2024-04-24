@@ -25,7 +25,7 @@ const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.
   ssr: false,
   loading: () => (
     <div className='flex h-96 w-full flex-col items-center justify-center'>
-      <svg className='-ml-1 mr-3 h-5 w-5 animate-spin text-black' fill='none' viewBox='0 0 24 24'>
+      <svg className='-ml-1 mr-3 size-5 animate-spin text-black' fill='none' viewBox='0 0 24 24'>
         <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
         <path
           className='opacity-75'
@@ -210,7 +210,7 @@ export default function Page() {
 
       }
     }
-  }, [commitTx.data || {}, commitTx.isSuccess, commitTx.isLoading, commitTx.isError, committed]);
+  }, [commitTx, commitTx.data || {}, commitTx.isSuccess, commitTx.isLoading, commitTx.isError, committed]);
 
   useEffect(() => {
     const mintTxId = localStorage.getItem('mintTxId');
@@ -229,7 +229,7 @@ export default function Page() {
         setState('mint');
       }
     }
-  }, [mintTx.data || {}, mintTx.isSuccess, mintTx.isLoading, mintTx.isError]);
+  }, [mintTx, mintTx.data || {}, mintTx.isSuccess, mintTx.isLoading, mintTx.isError]);
 
   const startRecord = async () => {
     if ("MediaRecorder" in window) {
@@ -436,11 +436,11 @@ export default function Page() {
 
   return (
     <>
-      <div className='flex justify-center items-center max-h-screen'>
-        <div className='w-full text-center mx-auto flex flex-col flex-wrap items-center md:flex-row'>
+      <div className='flex max-h-screen items-center justify-center'>
+        <div className='mx-auto flex w-full flex-col flex-wrap items-center text-center md:flex-row'>
           <View
             presentation
-            className='flex h-[25rem] sm:h-[32rem] md:h-[36rem] w-full flex-col items-center justify-center'
+            className='flex h-[25rem] w-full flex-col items-center justify-center sm:h-128 md:h-[36rem]'
           >
             <Suspense fallback={null}>
               <Avatar position={[0, -1.3, 4.5]} rotation={[0, -Math.PI, 0]} avatarState={state} />
@@ -450,35 +450,35 @@ export default function Page() {
         </div>
       </div>
 
-      <div className='flex justify-center items-center'>
-        <div className='flex w-full flex-col justify-center items-center p-2 text-center'>
+      <div className='flex items-center justify-center'>
+        <div className='flex w-full flex-col items-center justify-center p-2 text-center'>
           {
             state === "start" &&
-            <h1 className='my-2 text-lg md:text-2xl lg:text-3xl leading-tight text-center'>Think you can be the next <strong> Crypto Idol</strong> ?</h1>
+            <h1 className='my-2 text-center text-lg leading-tight md:text-2xl lg:text-3xl'>Think you can be the next <strong> Crypto Idol</strong> ?</h1>
           }
           {
             state === "inprogress" && recording &&
             <>
-            <h1 className='my-2 text-lg md:text-xl lg:text-2xl leading-tight text-center'>Sing now! Press Stop when you&#39;re done️</h1>
+            <h1 className='my-2 text-center text-lg leading-tight md:text-xl lg:text-2xl'>Sing now! Press Stop when you&#39;re done️</h1>
             </>
           }
           {
             state === "end" && !recording &&
             <>
-            <h1 className='my-2 text-lg md:text-xl lg:text-2xl leading-tight text-center'>Will the AI like you? Get judged 🤔️</h1>
+            <h1 className='my-2 text-center text-lg leading-tight md:text-xl lg:text-2xl'>Will the AI like you? Get judged 🤔️</h1>
             </>
           }
           {
             state === "inprogress" && !recording &&
             <>
-            <h1 className='my-2 text-lg md:text-xl lg:text-2xl leading-tight text-center'>Here&#39;s what you&#39;ve sung ❤️</h1>
+            <h1 className='my-2 text-center text-lg leading-tight md:text-xl lg:text-2xl'>Here&#39;s what you&#39;ve sung ❤️</h1>
             </>
           }
           {
             state === "processing" && !recording &&
             <>
-            <h1 className='my-2 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️Computing results and zkml proof 🤖... Please give me a min or more</h1>
-            <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
+            <h1 className='my-2 text-center text-lg leading-tight md:text-xl lg:text-2xl'>️Computing results and zkml proof 🤖... Please give me a min or more</h1>
+            <button type="button" className="my-2 mr-2 rounded-lg bg-gradient-to-r from-red-400 via-red-500 to-red-600 px-5 py-4 text-center text-lg font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-red-300"
               onClick={(e) => {
                 e.preventDefault()
                 localStorage.removeItem("recipe_id")
@@ -494,11 +494,11 @@ export default function Page() {
           {
             state === "result" && !recording &&
             <>
-              <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
+              <h1 className='my-1 text-center text-lg leading-tight md:text-xl lg:text-2xl'>️
                 <strong>Score: {rating}.</strong> {resultMsg}
               </h1>
               { rating !== "?" &&
-                <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
+                <button type="button" className="my-2 ml-4 mr-2 rounded-lg bg-gradient-to-r from-green-400 via-green-500 to-green-600 px-5 py-4 text-center text-lg font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-green-300"
                   onClick={(e) => {
                     e.preventDefault()
                     commitResult()
@@ -507,7 +507,7 @@ export default function Page() {
                   COMMIT RESULTS
                 </button>
               }
-              <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
+              <button type="button" className="my-2 mr-2 rounded-lg bg-gradient-to-r from-red-400 via-red-500 to-red-600 px-5 py-4 text-center text-lg font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-red-300"
                 onClick={(e) => {
                   e.preventDefault()
                   restart()
@@ -520,10 +520,10 @@ export default function Page() {
           {
             state === "committing" &&
             <>
-              <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
+              <h1 className='my-1 text-center text-lg leading-tight md:text-xl lg:text-2xl'>️
                 Committing results onchain...
               </h1>
-              <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
+              <button type="button" className="my-2 mr-2 rounded-lg bg-gradient-to-r from-red-400 via-red-500 to-red-600 px-5 py-4 text-center text-lg font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-red-300"
                 onClick={(e) => {
                   e.preventDefault()
                   restart()
@@ -535,10 +535,10 @@ export default function Page() {
           }
           { state === "mint" &&
             <>
-              <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
+              <h1 className='my-1 text-center text-lg leading-tight md:text-xl lg:text-2xl'>️
                 Audio data has been committed onchain you may now mint and turn your voice into a CryptoIdol!
               </h1>
-              <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
+              <button type="button" className="my-2 ml-4 mr-2 rounded-lg bg-gradient-to-r from-green-400 via-green-500 to-green-600 px-5 py-4 text-center text-lg font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-green-300"
                 onClick={(e) => {
                   e.preventDefault()
                   mint()
@@ -546,7 +546,7 @@ export default function Page() {
               >
                 MINT (0.01 ETH)
               </button>
-              <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
+              <button type="button" className="my-2 mr-2 rounded-lg bg-gradient-to-r from-red-400 via-red-500 to-red-600 px-5 py-4 text-center text-lg font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-red-300"
                 onClick={(e) => {
                   e.preventDefault()
                   restart()
@@ -559,10 +559,10 @@ export default function Page() {
           {
             state === "minting" &&
             <>
-              <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
+              <h1 className='my-1 text-center text-lg leading-tight md:text-xl lg:text-2xl'>️
                 Turning your voice into dynamic onchain art...
               </h1>
-              <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
+              <button type="button" className="my-2 mr-2 rounded-lg bg-gradient-to-r from-red-400 via-red-500 to-red-600 px-5 py-4 text-center text-lg font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-red-300"
                 onClick={(e) => {
                   e.preventDefault()
                   restart()
@@ -574,7 +574,7 @@ export default function Page() {
           }
           { state === "minted" &&
             <>
-              <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
+              <h1 className='my-1 text-center text-lg leading-tight md:text-xl lg:text-2xl'>️
                 Thanks for minting!
               </h1>
               <h3 className="mb-1">
@@ -590,11 +590,11 @@ export default function Page() {
                     type="button"
                     data-te-ripple-init
                     data-te-ripple-color="light"
-                    className="mb-2 inline-block rounded ml-1 mr-1 px-6 py-4 text-xs font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
+                    className="mx-1 mb-2 inline-block rounded px-6 py-4 text-xs font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
                     style={{backgroundColor: "#0077b5"}}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
+                      className="size-4"
                       fill="currentColor"
                       viewBox="0 0 24 24">
                       <path
@@ -611,11 +611,11 @@ export default function Page() {
                     type="button"
                     data-te-ripple-init
                     data-te-ripple-color="light"
-                    className="mb-2 inline-block rounded ml-1 mr-1 px-6 py-4 text-xs font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
+                    className="mx-1 mb-2 inline-block rounded px-6 py-4 text-xs font-medium uppercase leading-normal text-white shadow-md transition duration-150 ease-in-out hover:shadow-lg focus:shadow-lg focus:outline-none focus:ring-0 active:shadow-lg"
                     style={{backgroundColor: "#1da1f2"}}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
+                      className="size-4"
                       fill="currentColor"
                       viewBox="0 0 24 24">
                       <path
@@ -624,7 +624,7 @@ export default function Page() {
                 </button>
               </a>
               </div>
-              <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
+              <button type="button" className="my-2 ml-4 mr-2 rounded-lg bg-gradient-to-r from-green-400 via-green-500 to-green-600 px-5 py-4 text-center text-lg font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-green-300"
                 onClick={(e) => {
                   e.preventDefault()
                   restart()
@@ -635,7 +635,7 @@ export default function Page() {
             </>
           }
 
-          <div className='my-2 ml-8 mr-8 flex justify-center items-center text-center'>
+          <div className='mx-8 my-2 flex items-center justify-center text-center'>
             { state !== "processing" && state !== "result" &&
               <RecordButton
                 recordState={state}
@@ -660,7 +660,7 @@ export default function Page() {
             }
             { state === "end" &&
               <>
-                <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
+                <button type="button" className="my-2 ml-4 mr-2 rounded-lg bg-gradient-to-r from-green-400 via-green-500 to-green-600 px-5 py-4 text-center text-lg font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-green-300"
                   onClick={(e) => {
                     e.preventDefault()
                     submitRecording()
@@ -668,7 +668,7 @@ export default function Page() {
                 >
                   SUBMIT
                 </button>
-                <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-lg px-5 py-4 text-center mr-2 mb-2 mt-2"
+                <button type="button" className="my-2 mr-2 rounded-lg bg-gradient-to-r from-red-400 via-red-500 to-red-600 px-5 py-4 text-center text-lg font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-red-300"
                   onClick={(e) => {
                     e.preventDefault()
                     restart()
