@@ -1,18 +1,17 @@
-import { useAccount, useNetwork } from 'wagmi'
+import { useAccount } from 'wagmi'
 import dynamic from 'next/dynamic'
 
 function Footer() {
-  const { address, isConnected } = useAccount()
-  const { chain } = useNetwork()
+  const { chain, isConnected } = useAccount()
 
   return (
-    <footer className="fixed bottom-0 left-0 z-20 w-full pl-3 pr-3 pt-1.5 pb-1.5 bg-white border-t border-gray-200 shadow md:flex md:items-center md:justify-between md:p-3">
-      <ul className="flex flex-wrap items-center mt-1 text-lg font-medium text-gray-800 sm:mt-0">
+    <footer className="w-full pt-3 pb-2 pr-2 pl-2 bg-white border-t border-gray-200 shadow md:flex md:items-center md:justify-between">
+      <ul className="flex flex-wrap items-center m-1 text-lg font-medium text-gray-800 sm:mt-0">
         <li>
           <a href="/" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Sing to Mint</a>
         </li>
         {
-          isConnected && chain.id === 11155111 &&
+          isConnected && chain?.id === 11155111 &&
           <li>
             <a target="_blank" href="https://testnets.opensea.io/collection/cryptoidol" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Collection</a>
           </li>

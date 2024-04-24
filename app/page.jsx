@@ -7,10 +7,8 @@ import { Suspense } from 'react'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import {
   useAccount,
-  useNetwork,
-  usePrepareContractWrite,
-  useContractWrite,
-  useWaitForTransaction
+  useWriteContract,
+  useWaitForTransactionReceipt
 } from 'wagmi'
 import axios from 'axios'
 import addresses from '../data/addresses.json'
@@ -57,31 +55,24 @@ export default function Page() {
   const [score, setScore] = useState(0)
   const [scoreHex, setScoreHex] = useState(null)
   const [proof, setProof] = useState(null)
-  const [committed, setCommitted] = useState(false)
   const [rating, setRating] = useState(null)
   const [resultMsg, setResultMsg] = useState(null)
   const [mimeType, setMimeType] = useState('audio/webm')
   const [polling, setPolling] = useState(false)
   const [commitTxId, setCommitTxId] = useState(null)
+  const [committed, setCommitted] = useState(false)
   const [mintTxId, setMintTxId] = useState(null)
+  const [minted, setMinted] = useState(false)
 
 
   const playback = useRef(null)
   const { openConnectModal } = useConnectModal()
-  const { address, isConnected } = useAccount()
-  const { chain } = useNetwork()
+  const { chain, isConnected } = useAccount()
   const mediaRecorder = useRef(null)
 
-  let commitConfig;
-  let mintConfig;
+  const { writeContractAsync }  = useWriteContract()
 
-  const commitTx = useWaitForTransaction({
-    chainId: chain?.id,
-    hash: commitTxId,
-  })
-  // console.log("commitTx: ", commitTx)
-
-  const commitData = usePrepareContractWrite({
+  const commitConfig = {
     address: chain?.id === 11155111 ? addresses.sepolia : null,
     abi: cryptoIdolABI,
     functionName: 'commitResult',
@@ -96,31 +87,31 @@ export default function Page() {
         )
       )
     ],
-    enabled: Boolean(proof) && Boolean(scoreHex) && !commitTx.data?.blockHash
-  })
+  };
 
-  commitConfig = commitData.config
-
-  const commitPhase = useContractWrite(commitConfig)
-
-  const mintData = usePrepareContractWrite({
+  const mintConfig = {
     address: chain?.id === 11155111 ? addresses.sepolia : null,
     abi: cryptoIdolABI,
     functionName: 'mint',
     value: parseEther("0.01"),
     args: [proof, [scoreHex]],
-    enabled: Boolean(proof) && Boolean(scoreHex) && Boolean(commitTxId) && Boolean(commitTx.data?.blockHash)
-  })
+  };
 
-  mintConfig = mintData.config
-
-
-  const mintPhase = useContractWrite(mintConfig)
-  const mintTx = useWaitForTransaction({
+  const commitTx = useWaitForTransactionReceipt({
     chainId: chain?.id,
-    hash: mintTxId
+    hash: commitTxId,
+    enabled: Boolean(commitTxId) && !committed,
+    refetchInterval: 2000,
+    refetchIntervalInBackground: true
   })
-  // console.log("mintTx: ", mintTx)
+
+  const mintTx = useWaitForTransactionReceipt({
+    chainId: chain?.id,
+    hash: mintTxId,
+    enabled: Boolean(mintTxId) && committed,
+    refetchInterval: 2000,
+    refetchIntervalInBackground: true
+  })
 
   useEffect(() => {
     if (MediaRecorder.isTypeSupported('audio/webm')) {
@@ -136,8 +127,6 @@ export default function Page() {
     const proof = localStorage.getItem("proof")
     const score = parseInt(localStorage.getItem("score"))
     const scoreHex = localStorage.getItem("scoreHex")
-    const commitTxId = localStorage.getItem("commitTxId")
-    const mintTxId = localStorage.getItem("mintTxId")
 
     if (recipeId) {
         setPolling(true);
@@ -190,71 +179,57 @@ export default function Page() {
         setProof(proof)
         setResultDisplay(score)
       }
+    }
+  }, [
+    polling,
+    proof,
+    score,
+    scoreHex,
+  ])
+
+  useEffect(() => {
+    const commitTxId = localStorage.getItem('commitTxId')
+    const committed = localStorage.getItem('committed')
+
+    if (!committed) {
       if (commitTxId) {
         setCommitTxId(commitTxId)
+        console.log(commitTx)
 
         if (commitTx.isSuccess) {
-          setState("mint")
+          localStorage.setItem('committed', "1")
+          setCommitted(true)
+          setState('mint')
         }
-
         if (commitTx.isLoading) {
-          setState("committing")
+          setState('committing')
         }
-
         if (commitTx.isError) {
-          setState("commit")
-        }
-      }
-      if (mintTxId) {
-        setMintTxId(mintTxId)
-
-        if (mintTx.isSuccess) {
-          setState("minted")
+          setState('commit')
         }
 
-        if (mintTx.isLoading) {
-          setState("minting")
-        }
-
-        if (mintTx.isError) {
-          setState("mint")
-        }
       }
     }
-
-  }, [polling, proof, score, scoreHex, commitTxId, commitTx.data, mintTxId, mintTx.data]);
-
-  // handle commit Phase
-  useEffect(() => {
-    if (commitPhase.isError) {
-      setState("result")
-    }
-
-    if (commitPhase.data) {
-      setCommitTxId(commitPhase.data.hash)
-      localStorage.setItem("commitTxId", commitPhase.data.hash)
-    }
-
-    if (commitPhase.isSuccess) {
-      setState("mint")
-    }
-
-  }, [commitPhase.isSuccess, commitPhase.data, commitPhase.isError])
+  }, [commitTx.data || {}, commitTx.isSuccess, commitTx.isLoading, commitTx.isError, committed]);
 
   useEffect(() => {
-    if (mintPhase.isError) {
-      setState("mint")
-    }
+    const mintTxId = localStorage.getItem('mintTxId');
 
-    if (mintPhase.data) {
-      setMintTxId(mintPhase.data.hash)
-      localStorage.setItem("mintTxId", mintPhase.data.hash)
-    }
+    if (mintTxId) {
+      setMintTxId(mintTxId);
+      console.log(mintTx);
 
-    if (mintPhase.isSuccess) {
-      setState("minted")
+      if (mintTx.isSuccess) {
+        setState('minted');
+      }
+      if (mintTx.isLoading) {
+        setState('minting');
+      }
+      if (mintTx.isError) {
+        setState('mint');
+      }
     }
-  }, [mintPhase.isSuccess, mintPhase.data, mintPhase.isError])
+  }, [mintTx.data || {}, mintTx.isSuccess, mintTx.isLoading, mintTx.isError]);
 
   const startRecord = async () => {
     if ("MediaRecorder" in window) {
@@ -412,6 +387,7 @@ export default function Page() {
     localStorage.removeItem("scoreHex")
     localStorage.removeItem("proof")
     localStorage.removeItem("commitTxId")
+    localStorage.removeItem("committed")
     localStorage.removeItem("mintTxId")
   }
 
@@ -423,11 +399,12 @@ export default function Page() {
     console.log("proof: ", proof)
     console.log("score: ", scoreHex)
     console.log("keccak: ", keccak256(encodeAbiParameters([{ type: 'bytes' }, { type: 'uint256[]' } ], [proof, [score]])))
-    console.log("commit data: ", commitPhase)
 
     try {
-      const commitWrite = await commitPhase.writeAsync?.()
-      console.log(commitWrite)
+      const commitWrite = await writeContractAsync(commitConfig)
+      console.log("commitTxId: ", commitWrite)
+      setCommitTxId(commitWrite)
+      localStorage.setItem("commitTxId", commitWrite)
     }
     catch (err) {
       console.log(err)
@@ -443,11 +420,12 @@ export default function Page() {
 
     console.log("proof: ", proof)
     console.log("score: ", scoreHex)
-    console.log("mint data: ", mintPhase)
 
     try {
-      const mintWrite = await mintPhase.writeAsync?.()
-      console.log(mintWrite)
+      const mintWrite = await writeContractAsync(mintConfig)
+      console.log("mintTxId: ", mintWrite)
+      setMintTxId(mintWrite)
+      localStorage.setItem("mintTxId", mintWrite)
     }
     catch (err) {
       console.log(err)
@@ -521,7 +499,6 @@ export default function Page() {
               </h1>
               { rating !== "?" &&
                 <button type="button" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-lg px-5 py-4 text-center ml-4 mr-2 mb-2 mt-2"
-                  disabled={commitPhase.isLoading}
                   onClick={(e) => {
                     e.preventDefault()
                     commitResult()
@@ -597,6 +574,9 @@ export default function Page() {
           }
           { state === "minted" &&
             <>
+              <h1 className='my-1 text-lg md:text-xl lg:text-2xl leading-tight text-center'>️
+                Thanks for minting!
+              </h1>
               <h3 className="mb-1">
                 Share On Socials
               </h3>
