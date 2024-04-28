@@ -8,12 +8,15 @@ import { useConnectModal } from '@rainbow-me/rainbowkit'
 import {
   useAccount,
   useWriteContract,
-  useWaitForTransactionReceipt
+  useWaitForTransactionReceipt,
+  useReadContract,
 } from 'wagmi'
 import axios from 'axios'
 import addresses from '../data/addresses.json'
 import cryptoIdolABI from '../data/CryptoIdol.json'
 import { keccak256, encodeAbiParameters, parseEther } from 'viem'
+import Confetti from "react-confetti"
+import { useWindowSize } from "react-use";
 
 
 // const Logo = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Logo), { ssr: false })
@@ -62,7 +65,8 @@ export default function Page() {
   const [commitTxId, setCommitTxId] = useState(null)
   const [committed, setCommitted] = useState(false)
   const [mintTxId, setMintTxId] = useState(null)
-  const [minted, setMinted] = useState(false)
+  const [tokenIdMinted, setTokenIdMinted] = useState("0x0000000000000000000000000000000000000000000000000000000000000000")
+  const { width, height } = useWindowSize()
 
 
   const playback = useRef(null)
@@ -112,6 +116,23 @@ export default function Page() {
     refetchInterval: 2000,
     refetchIntervalInBackground: true
   })
+
+  const tokenMetadata = useReadContract({
+    address: chain?.id === 11155111 ? addresses.sepolia : null,
+    abi: cryptoIdolABI,
+    functionName: 'tokenURI',
+    args: [tokenIdMinted]
+  })
+
+  let imageData;
+  if (tokenMetadata.data) {
+    const data = tokenMetadata?.data
+    const jsonData = data.split(",")[1]
+    const decodedJson = atob(jsonData)
+    const jsonObject = JSON.parse(decodedJson)
+    imageData = jsonObject.image
+  }
+
 
   useEffect(() => {
     if (MediaRecorder.isTypeSupported('audio/webm')) {
@@ -194,7 +215,6 @@ export default function Page() {
     if (!committed) {
       if (commitTxId) {
         setCommitTxId(commitTxId)
-        console.log(commitTx)
 
         if (commitTx.isSuccess) {
           localStorage.setItem('committed', "1")
@@ -217,10 +237,10 @@ export default function Page() {
 
     if (mintTxId) {
       setMintTxId(mintTxId);
-      console.log(mintTx);
 
       if (mintTx.isSuccess) {
         setState('minted');
+        setTokenIdMinted(mintTx.data?.logs[0].topics[3])
       }
       if (mintTx.isLoading) {
         setState('minting');
@@ -407,6 +427,7 @@ export default function Page() {
       localStorage.setItem("commitTxId", commitWrite)
     }
     catch (err) {
+      alert(err)
       console.log(err)
       return
     }
@@ -428,6 +449,7 @@ export default function Page() {
       localStorage.setItem("mintTxId", mintWrite)
     }
     catch (err) {
+      alert(err)
       console.log(err)
       return
     }
@@ -438,15 +460,32 @@ export default function Page() {
     <>
       <div className='flex max-h-screen items-center justify-center'>
         <div className='mx-auto flex w-full flex-col flex-wrap items-center text-center md:flex-row'>
-          <View
-            presentation
-            className='flex h-[25rem] w-full flex-col items-center justify-center sm:h-128 md:h-[36rem]'
-          >
-            <Suspense fallback={null}>
-              <Avatar position={[0, -1.3, 4.5]} rotation={[0, -Math.PI, 0]} avatarState={state} />
-              <Common />
-            </Suspense>
-          </View>
+          {
+            state !== "minted" &&
+            <View
+              presentation
+              className='flex h-[25rem] w-full flex-col items-center justify-center sm:h-128 md:h-[36rem]'
+            >
+              <Suspense fallback={null}>
+                <Avatar position={[0, -1.3, 4.5]} rotation={[0, -Math.PI, 0]} avatarState={state} />
+                <Common />
+              </Suspense>
+            </View>
+          }
+          {
+            state === "minted" &&
+            <>
+            <Confetti
+              width={width}
+              height={height}
+            />
+            <div className='mx-auto flex w-full flex-col flex-wrap items-center text-center'>
+              <div className="flex-col items-center justify-center rounded-lg mt-20 mb-20">
+                <img className="rounded-lg w-80 h-80" src={imageData}/>
+              </div>
+            </div>
+            </>
+          }
         </div>
       </div>
 
@@ -575,7 +614,7 @@ export default function Page() {
           { state === "minted" &&
             <>
               <h1 className='my-1 text-center text-lg leading-tight md:text-xl lg:text-2xl'>️
-                Thanks for minting!
+                Thanks for minting! The metadata of a CryptoIdol evolves with block time don't be surprised if it changes.
               </h1>
               <h3 className="mb-1">
                 Share On Socials
