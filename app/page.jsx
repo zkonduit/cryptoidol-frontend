@@ -66,6 +66,8 @@ export default function Page() {
   const [committed, setCommitted] = useState(false)
   const [mintTxId, setMintTxId] = useState(null)
   const [tokenIdMinted, setTokenIdMinted] = useState("0x0000000000000000000000000000000000000000000000000000000000000000")
+  const [commitConfig, setCommitConfig] = useState(null);
+  const [mintConfig, setMintConfig] = useState(null);
   const { width, height } = useWindowSize()
 
 
@@ -75,31 +77,6 @@ export default function Page() {
   const mediaRecorder = useRef(null)
 
   const { writeContractAsync }  = useWriteContract()
-
-  const commitConfig = {
-    address: chain?.id === 11155111 ? addresses.sepolia : null,
-    abi: cryptoIdolABI,
-    functionName: 'commitResult',
-    args: [
-      keccak256(
-        encodeAbiParameters(
-          [{ type: 'bytes' }, { type: 'uint256[]' }],
-          [
-            proof || "0x0000000000000000000000000000000000000000000000000000000000000000",
-            score ? [scoreHex] : ["0x0000000000000000000000000000000000000000000000000000000000000000"]
-          ]
-        )
-      )
-    ],
-  };
-
-  const mintConfig = {
-    address: chain?.id === 11155111 ? addresses.sepolia : null,
-    abi: cryptoIdolABI,
-    functionName: 'mint',
-    value: parseEther("0.01"),
-    args: [proof, [scoreHex]],
-  };
 
   const commitTx = useWaitForTransactionReceipt({
     chainId: chain?.id,
@@ -132,6 +109,33 @@ export default function Page() {
     const jsonObject = JSON.parse(decodedJson)
     imageData = jsonObject.image
   }
+
+  useEffect(() => {
+    setCommitConfig({
+      address: chain?.id === 11155111 ? addresses.sepolia : null,
+      abi: cryptoIdolABI,
+      functionName: 'commitResult',
+      args: [
+        keccak256(
+          encodeAbiParameters(
+            [{ type: 'bytes' }, { type: 'uint256[]' }],
+            [
+              proof || "0x0000000000000000000000000000000000000000000000000000000000000000",
+              score ? [scoreHex] : ["0x0000000000000000000000000000000000000000000000000000000000000000"]
+            ]
+          )
+        )
+      ],
+    });
+
+    setMintConfig({
+      address: chain?.id === 11155111 ? addresses.sepolia : null,
+      abi: cryptoIdolABI,
+      functionName: 'mint',
+      value: parseEther("0.01"),
+      args: [proof, [scoreHex]],
+    });
+  }, [chain, proof, scoreHex, score])
 
 
   useEffect(() => {
@@ -614,7 +618,7 @@ export default function Page() {
           { state === "minted" &&
             <>
               <h1 className='my-1 text-center text-lg leading-tight md:text-xl lg:text-2xl'>️
-                Thanks for minting! The metadata of a CryptoIdol evolves with block time don't be surprised if it changes.
+                Thanks for minting! The metadata of a CryptoIdol evolves with block time don&apos;t be surprised if it changes.
               </h1>
               <h3 className="mb-1">
                 Share On Socials
