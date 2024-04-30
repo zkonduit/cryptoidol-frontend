@@ -159,7 +159,7 @@ export default function Page() {
         const intervalId = setInterval(async () => {
             try {
                 console.log("Polling for results...")
-                const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND}/recipe/${recipeId}`);
+                const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND}/recipe/${recipeId}/`);
 
                 if (res.data) {
                     // Assuming the endpoint returns a value that indicates it's time to stop polling
@@ -192,7 +192,7 @@ export default function Page() {
                 console.error('Error polling endpoint: ', error)
               }
             }
-        }, 10000); // Poll every 10 seconds, adjust as needed
+        }, 15000); // Poll every 15 seconds, adjust as needed
 
         return () => clearInterval(intervalId)
 
@@ -377,7 +377,7 @@ export default function Page() {
         }
 
         setState("processing")
-        let res = await axios.post(process.env.NEXT_PUBLIC_BACKEND + `/prove`, formData, {
+        let res = await axios.post(process.env.NEXT_PUBLIC_BACKEND + `/prove/`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
