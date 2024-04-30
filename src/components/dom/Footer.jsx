@@ -13,7 +13,7 @@ function Footer() {
         {
           isConnected && chain?.id === 11155111 &&
           <li>
-            <a target="_blank" href="https://testnets.opensea.io/collection/cryptoidol" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Collection</a>
+            <a target="_blank" href="https://testnets.opensea.io/collection/cryptoidol-1" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Collection</a>
           </li>
         }
         {/* <li>
