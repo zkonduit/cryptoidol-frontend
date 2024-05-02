@@ -17,10 +17,10 @@ const projectId = '4343b461c70fd4bcef677ee051994b48';
 const config = getDefaultConfig({
   appName: 'CryptoIdol',
   projectId: projectId,
-  chains: [sepolia, base],
+  chains: [base, sepolia],
   transports: {
+    [base.id]: http(),
     [sepolia.id]: http(),
-    [base.id]: http()
   },
   ssr: true
 })
