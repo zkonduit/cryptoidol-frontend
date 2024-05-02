@@ -16,6 +16,12 @@ function Footer() {
             <a target="_blank" href="https://testnets.opensea.io/collection/cryptoidol-1" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Collection</a>
           </li>
         }
+        {
+          isConnected && chain?.id === 8453 &&
+          <li>
+            <a target="_blank" href="https://opensea.io/collection/cryptoidolnft" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Collection</a>
+          </li>
+        }
         {/* <li>
           <a href="/bounty" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Bounty</a>
         </li> */}
