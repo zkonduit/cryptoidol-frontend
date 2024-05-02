@@ -2,7 +2,6 @@ import { useAccount } from 'wagmi'
 import dynamic from 'next/dynamic'
 
 function Footer() {
-  const { chain, isConnected } = useAccount()
 
   return (
     <footer className="w-full pt-3 pb-2 pr-2 pl-2 bg-white border-t border-gray-200 shadow md:flex md:items-center md:justify-between">
@@ -10,18 +9,9 @@ function Footer() {
         <li>
           <a href="/" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Sing to Mint</a>
         </li>
-        {
-          isConnected && chain?.id === 11155111 &&
-          <li>
-            <a target="_blank" href="https://testnets.opensea.io/collection/cryptoidol-1" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Collection</a>
-          </li>
-        }
-        {
-          isConnected && chain?.id === 8453 &&
-          <li>
-            <a target="_blank" href="https://opensea.io/collection/cryptoidolnft" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Collection</a>
-          </li>
-        }
+        <li>
+          <a target="_blank" href="https://opensea.io/collection/cryptoidolnft" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Collection</a>
+        </li>
         {/* <li>
           <a href="/bounty" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Bounty</a>
         </li> */}
