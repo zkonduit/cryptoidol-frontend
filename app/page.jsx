@@ -95,7 +95,7 @@ export default function Page() {
   })
 
   const tokenMetadata = useReadContract({
-    address: chain?.id === 11155111 ? addresses.sepolia : null,
+    address: chain?.id === 11155111 ? addresses.sepolia : addresses.base,
     abi: cryptoIdolABI,
     functionName: 'tokenURI',
     args: [tokenIdMinted]
@@ -112,7 +112,7 @@ export default function Page() {
 
   useEffect(() => {
     setCommitConfig({
-      address: chain?.id === 11155111 ? addresses.sepolia : null,
+      address: chain?.id === 11155111 ? addresses.sepolia : addresses.base,
       abi: cryptoIdolABI,
       functionName: 'commitResult',
       args: [
@@ -129,7 +129,7 @@ export default function Page() {
     });
 
     setMintConfig({
-      address: chain?.id === 11155111 ? addresses.sepolia : null,
+      address: chain?.id === 11155111 ? addresses.sepolia : addresses.base,
       abi: cryptoIdolABI,
       functionName: 'mint',
       value: parseEther("0.01"),

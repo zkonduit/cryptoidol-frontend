@@ -12,14 +12,15 @@ import { WagmiProvider, http } from 'wagmi';
 import { base, sepolia } from 'wagmi/chains';
 
 
-const projectId = '4702df26ee1e615caf9d676f6787b243';
+const projectId = '4343b461c70fd4bcef677ee051994b48';
 
 const config = getDefaultConfig({
   appName: 'CryptoIdol',
   projectId: projectId,
-  chains: [sepolia], // to add base
+  chains: [sepolia, base],
   transports: {
-    [sepolia.id]: http()
+    [sepolia.id]: http(),
+    [base.id]: http()
   },
   ssr: true
 })
