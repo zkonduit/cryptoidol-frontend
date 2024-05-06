@@ -305,33 +305,28 @@ export default function Page() {
 
   const setResultDisplay = (score) => {
     if (score === 0) {
-      setRating("E")
-      setResultMsg("Yoko OnO :(")
-    }
-    else if (score === 1) {
-      setRating("D")
-      setResultMsg("Best voice in the world, just not the world I'm living in right now.")
-    }
-    else if (score === 2) {
-      setRating("C")
-      setResultMsg("What an average sounding voice :O")
-    }
-    else if (score === 3) {
-      setRating("B")
-      setResultMsg("You are a cut above the rest!")
-    }
-    else if (score === 4) {
-      setRating("A")
-      setResultMsg("You are so amazing!")
-    }
-    else if (score >= 5) {
-      setRating("S")
-      setResultMsg("Oh my, what a sexy voice! I'm simping for u")
+      setRating("C");
+      setResultMsg("You're off to a good start! Keep practicing and you'll improve in no time.");
+    } else if (score === 1) {
+      setRating("B");
+      setResultMsg("Nice work! You're making progress. Keep up the effort and you'll reach new heights.");
+    } else if (score === 2) {
+      setRating("A");
+      setResultMsg("Impressive! Your skills are shining through. Keep pushing yourself to unlock your full potential.");
+    } else if (score === 3) {
+      setRating("S");
+      setResultMsg("Outstanding performance! Your dedication and hard work are evident. Keep aiming for excellence.");
+    } else if (score === 4) {
+      setRating("SS");
+      setResultMsg("Incredible! You're mastering this challenge with flying colors. Your achievements are remarkable.");
+    } else if (score >= 5) {
+      setRating("SSS");
+      setResultMsg("Perfection achieved! You've reached the pinnacle of success. Your skills are unparalleled.");
     } else {
-      setRating("?")
-      setResultMsg("Something went wrong! Could you please inform the devs?")
+      setRating("?");
+      setResultMsg("Something went wrong! Could you please inform the devs?");
     }
-  }
+  };
 
   const startPlayback = () => {
     playback.current = new Audio(audio)
