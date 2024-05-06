@@ -1,4 +1,3 @@
-import { useAccount } from 'wagmi'
 import dynamic from 'next/dynamic'
 
 function Footer() {

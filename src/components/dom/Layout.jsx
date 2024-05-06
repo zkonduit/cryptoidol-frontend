@@ -27,7 +27,6 @@ const config = getDefaultConfig({
 
 const queryClient = new QueryClient();
 
-
 const Scene = dynamic(() => import('@/components/canvas/Scene'), { ssr: false })
 
 const Layout = ({ children }) => {
@@ -36,30 +35,28 @@ const Layout = ({ children }) => {
   return (
     <div ref={ref}>
       <WagmiProvider config={config}>
-        <QueryClientProvider client={queryClient} >
+        <QueryClientProvider client={queryClient}>
           <RainbowKitProvider>
-            <div
-              className="flex flex-col h-screen overflow-auto"
-              style={{
-                WebkitOverflowScrolling: "touch"
-              }}>
+            <div className="flex flex-col h-screen">
               <div className="flex-none">
                 <NavBar />
               </div>
-              <div className="grow">
-                <Scene
-                  style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    width: '100vw',
-                    height: '100vh',
-                    pointerEvents: 'none',
-                  }}
-                  eventSource={ref}
-                  eventPrefix='client'
-                />
-                {children}
+              <div className="flex-1 overflow-y-scroll" style={{ WebkitOverflowScrolling: 'auto' }}>
+                <div className="relative h-full">
+                  <Scene
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      pointerEvents: 'none',
+                    }}
+                    eventSource={ref}
+                    eventPrefix='client'
+                  />
+                  {children}
+                </div>
               </div>
               <div className="flex-none">
                 <Footer />
