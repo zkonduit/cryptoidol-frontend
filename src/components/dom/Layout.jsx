@@ -42,7 +42,7 @@ const Layout = ({ children }) => {
                 <NavBar />
               </div>
               <div className="flex-1 overflow-y-scroll" style={{ WebkitOverflowScrolling: 'auto' }}>
-                <div className="relative h-full">
+                <div className="relative min-h-full">
                   <Scene
                     style={{
                       position: 'absolute',
@@ -58,7 +58,7 @@ const Layout = ({ children }) => {
                   {children}
                 </div>
               </div>
-              <div className="flex-none">
+              <div className="flex-none mt-auto">
                 <Footer />
               </div>
             </div>
