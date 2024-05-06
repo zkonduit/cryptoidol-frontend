@@ -37,12 +37,12 @@ const Layout = ({ children }) => {
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider>
-            <div className="flex flex-col h-screen">
+            <div className="flex flex-col min-h-screen">
               <div className="flex-none">
                 <NavBar />
               </div>
-              <div className="flex-1 overflow-y-scroll" style={{ WebkitOverflowScrolling: 'auto' }}>
-                <div className="relative min-h-full">
+              <div className="overflow-y-scroll min-h-screen min-w-screen" style={{ WebkitOverflowScrolling: 'auto' }}>
+                <div>
                   <Scene
                     style={{
                       position: 'absolute',
@@ -58,9 +58,7 @@ const Layout = ({ children }) => {
                   {children}
                 </div>
               </div>
-              <div className="flex-none mt-auto">
-                <Footer />
-              </div>
+              <Footer />
             </div>
           </RainbowKitProvider>
         </QueryClientProvider>
