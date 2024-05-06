@@ -44,7 +44,7 @@ const Layout = ({ children }) => {
               <div className="flex-none">
                 <NavBar />
               </div>
-              <div className="grow">
+              <div className="md:grow mb-2">
                 <div>
                   <Scene
                     style={{
