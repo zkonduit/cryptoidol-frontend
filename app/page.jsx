@@ -485,7 +485,7 @@ export default function Page() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSentence((prevSentence) => (prevSentence + 1) % sentences.length);
-    }, 4000);
+    }, 5000);
 
     return () => {
       clearInterval(timer);
