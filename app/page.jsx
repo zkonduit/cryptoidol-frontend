@@ -49,7 +49,7 @@ export default function Page() {
   // |___________________if recipe_id in localstorage__________________|
   //
   //
-  const [state, setState] = useState("start")
+  const [state, setState] = useState("processing")
   const [recording, setRecording] = useState(false)
   const [stream, setStream] = useState(null)
   const [audioChunks, setAudioChunks] = useState([])
@@ -69,6 +69,7 @@ export default function Page() {
   const [commitConfig, setCommitConfig] = useState(null);
   const [mintConfig, setMintConfig] = useState(null);
   const { width, height } = useWindowSize()
+  const [currentSentence, setCurrentSentence] = useState(0);
 
 
   const playback = useRef(null)
@@ -455,6 +456,42 @@ export default function Page() {
     setState("minting")
   }
 
+  const sentences = [
+    <span key={0}>Analyzing audio! Give us about a min 🕒</span>,
+    <span key={1}>Computing a cryptographic proof that the voice-judging model has been run correctly on your voice.</span>,
+    <span key={2}>
+      When done, mint an NFT that immortalizes your skill by verifying the proof on-chain.
+      <br />
+      Learn more at
+      &nbsp;
+      <a href="https://ezkl.xyz/" target="_blank" className="text-yellow-500 hover:text-yellow-800 hover:underline">
+        ezkl.xyz,
+      </a>
+      &nbsp;
+      or join our
+      &nbsp;
+      <a href="https://discord.gg/cbNvpsThmd" target="_blank" className="text-yellow-500 hover:text-yellow-800 hover:underline">
+        Discord
+      </a>
+      &nbsp;
+      or
+      &nbsp;
+      <a href="https://t.me/+QRzaRvTPIthlYWMx" target="_blank" className="text-yellow-500 hover:text-yellow-800 hover:underline">
+        Telegram,
+      </a>
+    </span>,
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSentence((prevSentence) => (prevSentence + 1) % sentences.length);
+    }, 4000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
   return (
     <>
       <div className='flex max-h-screen items-center justify-center'>
@@ -515,36 +552,30 @@ export default function Page() {
           {
             state === "processing" && !recording &&
             <>
-            <h1 className='my-2 mx-4 text-center text-md leading-tight md:text-lg lg:text-xl'>
-              Give us a min!
+            <h1 className="my-2 mx-4 text-center text-lg leading-tight md:text-xl lg:text-2xl">
+              <span
+                className={`transition-opacity ease-in-out duration-1000 ${
+                  currentSentence === 0 ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                {sentences[0]}
+              </span>
               <br />
-              We are analyzing your submission and computing a cryptographic proof that our voice-judging model has been run correctly on your voice.
+              <span
+                className={`transition-opacity ease-in-out duration-1000 ${
+                  currentSentence === 1 ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                {sentences[1]}
+              </span>
               <br />
-              When it is done, you can mint an NFT that immortalizes your skill by verifying the proof on-chain.
-              <br />
-              While you wait, learn more about ezkl at our
-              &nbsp;
-              <a href="https://blog.ezkl.xyz/" target="_blank" className="text-yellow-500 hover:text-yellow-800 hover:underline">
-                blog,
-              </a>
-              &nbsp;
-              join our
-              &nbsp;
-              <a href="https://discord.gg/cbNvpsThmd" target="_blank" className="text-yellow-500 hover:text-yellow-800 hover:underline">
-                Discord
-              </a>
-              &nbsp;
-              or
-              &nbsp;
-              <a href="https://t.me/+QRzaRvTPIthlYWMx" target="_blank" className="text-yellow-500 hover:text-yellow-800 hover:underline">
-                Telegram,
-              </a>
-              &nbsp;
-              or check out the
-              &nbsp;
-              <a href="https://github.com/zkonduit/ezkl" target="_blank" className="text-yellow-500 hover:text-yellow-800 hover:underline">
-                repo.
-              </a>
+              <span
+                className={`transition-opacity ease-in-out duration-1000 ${
+                  currentSentence === 2 ? 'opacity-100' : 'opacity-0'
+                }`}
+              >
+                {sentences[2]}
+              </span>
             </h1>
             <button type="button" className="my-2 mr-2 rounded-lg bg-gradient-to-r from-red-400 via-red-500 to-red-600 px-5 py-4 text-center text-lg font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-red-300"
               onClick={(e) => {
