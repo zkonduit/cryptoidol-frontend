@@ -25,45 +25,20 @@ export default function NavBar() {
             />
           </a>
         </div>
-        <div
-          className='object-right'
-          onClick={() => {
-            setExpand(!expand)
-          }}
-        >
-          <ConnectButton chainStatus="icon" showBalance={false} />
-          {/* <svg className='h-6 w-6 cursor-pointer md:hidden block background fill-gray-800'>
-            <path d={mdiMenu} />
-          </svg> */}
-        </div>
-        {/* <div
-          className={
-            expand
-              ? 'w-full md:flex md:items-center md:w-auto text-right'
-              : 'hidden w-full md:flex md:items-center md:w-auto text-right'
-          }
-          id='menu'
-        >
-          <ul
-            className='
-              text-base text-gray-700
-              pt-4
-              md:flex
-              md:justify-between
-              md:pt-0'
-          >
+        <div className="hidden w-full ml-10 md:flex md:items-center md:w-auto text-right" id='menu'>
+          <ul className="flex flex-wrap items-center m-1 text-lg font-medium text-gray-800 sm:mt-0">
             <li>
-              <a
-                className='md:p-4 py-2 block hover:text-yellow-400 font-extrabold'
-                href='https://github.com/zkonduit/ezkl'
-                target='_blank'
-                rel='noopener noreferrer'
-              >
-                GITHUB
-              </a>
+              <a href="/" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Sing to Mint</a>
+            </li>
+            <li>
+              <a target="_blank" href="https://opensea.io/collection/cryptoidolnft" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Collection</a>
+            </li>
+            <li>
+              <a href="https://github.com/zkonduit/ezkl" target="_blank" rel="noopener noreferrer" className="mr-4 hover:underline text-md hover:text-yellow-500 md:mr-6">Github</a>
             </li>
           </ul>
-        </div> */}
+        </div>
+        <ConnectButton chainStatus="icon" showBalance={false} />
       </div>
     </nav>
   )

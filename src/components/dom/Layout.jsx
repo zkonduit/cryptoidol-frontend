@@ -61,7 +61,9 @@ const Layout = ({ children }) => {
                   {children}
                 </div>
               </div>
-              <Footer />
+              <div className="md:hidden">
+                <Footer />
+              </div>
             </div>
           </RainbowKitProvider>
         </QueryClientProvider>
