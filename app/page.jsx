@@ -492,30 +492,60 @@ export default function Page() {
         <div className='flex w-full flex-col items-center justify-center p-2 text-center'>
           {
             state === "start" &&
-            <h1 className='my-2 text-center text-lg leading-tight md:text-2xl lg:text-3xl'>Think you can be the next <strong> Crypto Idol</strong> ?</h1>
+            <h1 className='my-2 mx-4 text-center text-lg leading-tight md:text-2xl lg:text-3xl'>Think you can be the next <strong> Crypto Idol</strong> ?</h1>
           }
           {
             state === "inprogress" && recording &&
             <>
-            <h1 className='my-2 text-center text-lg leading-tight md:text-xl lg:text-2xl'>Sing now! Press Stop when you&#39;re done️</h1>
+            <h1 className='my-2 mx-4 text-center text-lg leading-tight md:text-xl lg:text-2xl'>Sing now! Press Stop when you&#39;re done️</h1>
             </>
           }
           {
             state === "end" && !recording &&
             <>
-            <h1 className='my-2 text-center text-lg leading-tight md:text-xl lg:text-2xl'>Will the AI like you? Get judged 🤔️</h1>
+            <h1 className='my-2 mx-4 text-center text-lg leading-tight md:text-xl lg:text-2xl'>Will the AI like you? Get judged 🤔️</h1>
             </>
           }
           {
             state === "inprogress" && !recording &&
             <>
-            <h1 className='my-2 text-center text-lg leading-tight md:text-xl lg:text-2xl'>Here&#39;s what you&#39;ve sung ❤️</h1>
+            <h1 className='my-2 mx-4 text-center text-lg leading-tight md:text-xl lg:text-2xl'>Here&#39;s what you&#39;ve sung ❤️</h1>
             </>
           }
           {
             state === "processing" && !recording &&
             <>
-            <h1 className='my-2 text-center text-lg leading-tight md:text-xl lg:text-2xl'>️Computing results and zkml proof 🤖... Please give me a min or more</h1>
+            <h1 className='my-2 mx-4 text-center text-md leading-tight md:text-lg lg:text-xl'>
+              Give us a min!
+              <br />
+              We are analyzing your submission and computing a cryptographic proof that our voice-judging model has been run correctly on your voice.
+              <br />
+              When it is done, you can mint an NFT that immortalizes your skill by verifying the proof on-chain.
+              <br />
+              While you wait, learn more about ezkl at our
+              &nbsp;
+              <a href="https://blog.ezkl.xyz/" target="_blank" className="text-yellow-500 hover:text-yellow-800 hover:underline">
+                blog,
+              </a>
+              &nbsp;
+              join our
+              &nbsp;
+              <a href="https://discord.gg/cbNvpsThmd" target="_blank" className="text-yellow-500 hover:text-yellow-800 hover:underline">
+                Discord
+              </a>
+              &nbsp;
+              or
+              &nbsp;
+              <a href="https://t.me/+QRzaRvTPIthlYWMx" target="_blank" className="text-yellow-500 hover:text-yellow-800 hover:underline">
+                Telegram,
+              </a>
+              &nbsp;
+              or check out the
+              &nbsp;
+              <a href="https://github.com/zkonduit/ezkl" target="_blank" className="text-yellow-500 hover:text-yellow-800 hover:underline">
+                repo.
+              </a>
+            </h1>
             <button type="button" className="my-2 mr-2 rounded-lg bg-gradient-to-r from-red-400 via-red-500 to-red-600 px-5 py-4 text-center text-lg font-medium text-white hover:bg-gradient-to-br focus:outline-none focus:ring-4 focus:ring-red-300"
               onClick={(e) => {
                 e.preventDefault()
