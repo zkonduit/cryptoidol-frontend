@@ -44,22 +44,20 @@ const Layout = ({ children }) => {
               <div className="flex-none">
                 <NavBar />
               </div>
-              <div className="md:grow mb-2">
-                <div>
-                  <Scene
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      pointerEvents: 'none',
-                    }}
-                    eventSource={ref}
-                    eventPrefix='client'
-                  />
-                  {children}
-                </div>
+              <div className="md:grow pb-36">
+                <Scene
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    pointerEvents: 'none',
+                  }}
+                  eventSource={ref}
+                  eventPrefix='client'
+                />
+                {children}
               </div>
               <div className="md:hidden">
                 <Footer />
