@@ -17,6 +17,7 @@ import cryptoIdolABI from '../data/CryptoIdol.json'
 import { keccak256, encodeAbiParameters, parseEther } from 'viem'
 import Confetti from "react-confetti"
 import { useWindowSize } from "react-use";
+import Head from "./head";
 
 
 // const Logo = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Logo), { ssr: false })
@@ -49,7 +50,7 @@ export default function Page() {
   // |___________________if recipe_id in localstorage__________________|
   //
   //
-  const [state, setState] = useState("start")
+  const [state, setState] = useState("minted")
   const [recording, setRecording] = useState(false)
   const [stream, setStream] = useState(null)
   const [audioChunks, setAudioChunks] = useState([])
@@ -494,6 +495,7 @@ export default function Page() {
 
   return (
     <>
+      <Head />
       <div className='flex max-h-screen items-center justify-center'>
         <div className='mx-auto flex w-full flex-col flex-wrap items-center text-center md:flex-row'>
           {
