@@ -308,7 +308,7 @@ export default function Page() {
   const setResultDisplay = (score) => {
     if (score === 0) {
       setRating("C");
-      setResultMsg("You're off to a good start! Keep practicing and you'll improve in no time.");
+      setResultMsg("You're off to a good start! To be honest with you, I'm actually rating tone of your voice. The more surprised you sound the better 😉");
     } else if (score === 1) {
       setRating("B");
       setResultMsg("Nice work! You're making progress. Keep up the effort and you'll reach new heights.");
