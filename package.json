@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": true,
   "engines": {
-    "node": ">=14"
+    "node": ">=20"
   },
   "scripts": {
     "lint": "next lint --fix --dir app",
@@ -39,8 +39,8 @@
     "three": "^0.153.0",
     "three-stdlib": "^2.23.10",
     "tunnel-rat": "^0.1.2",
-    "viem": "^2.9.26",
-    "wagmi": "^2.5.20"
+    "viem": "^2.21.32",
+    "wagmi": "^2.12.20"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^13.3.0",

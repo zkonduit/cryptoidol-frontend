@@ -6,6 +6,8 @@ The site is hosted on [https://cryptoidol.tech](https://cryptoidol.tech)
 
 ## Quickstart for Development
 
+Note we use `node >= 20`
+
 ```
 yarn
 
